@@ -5,7 +5,7 @@
 [![npm](https://img.shields.io/npm/v/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 [![license](https://img.shields.io/npm/l/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 
-Библиотека для тестирования навыков Алисы. 
+Node.js библиотека для тестирования навыков Алисы. 
 Позволяет программно эмулировать сообщения пользователя согласно [API протокола](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/)
 и проверять ответы навыка.
 
