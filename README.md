@@ -1,8 +1,12 @@
 # alice-tester
 
 [![Build Status](https://travis-ci.org/vitalets/alice-tester.svg?branch=master)](https://travis-ci.org/vitalets/alice-tester)
+[![Coverage Status](https://coveralls.io/repos/github/vitalets/alice-tester/badge.svg?branch=master)](https://coveralls.io/github/vitalets/alice-tester?branch=master)
+[![npm](https://img.shields.io/npm/v/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
+[![license](https://img.shields.io/npm/l/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 
-Библиотека для локального авто-тестирования навыков Алисы. Позволяет эмулировать сообщения пользователя согласно [протоколу](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/)
+Библиотека для тестирования навыков Алисы. 
+Позволяет программно эмулировать сообщения пользователя согласно [API протокола](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/)
 и проверять ответы навыка.
 
 ## Содержание
@@ -56,7 +60,7 @@ mocha test.js
 ## API
 
 ### new User(webhookUrl, [extraProps])
-Создает пользователя для тестирования навыка.  
+Создание нового пользователя для теста.  
 **Параметры:**
   * **webhookUrl** `{String}` - вебхук-урл навыка.
   * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к каждому запросу.
