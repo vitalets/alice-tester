@@ -39,9 +39,6 @@ class User {
   }
 
   async say(message, extraProps = {}) {
-    if (this._messagesCount && !message && message !== 0) {
-      throw new Error(`User must say something, got message: ${message}`);
-    }
     this._resBody = null;
     this._messagesCount++;
     this._buildReqBody(message, extraProps);

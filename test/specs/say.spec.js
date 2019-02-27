@@ -107,22 +107,5 @@ describe('say', () => {
     await user.enter();
     await assertThrowsAsync(() => user.say('Что ты умеешь?'), /Skill error/);
   });
-
-  it('throws for empty message', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
-    const resBody1 = createResponse();
-
-    const reqBody2 = createRequest({
-      session: {new: false, message_id: 2},
-      request: {command: 'Что ты умеешь?', original_utterance: 'Что ты умеешь?'}
-    });
-
-    nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    nock('http://localhost').post('/', reqBody2).reply(500, 'Skill error');
-
-    const user = new User('http://localhost');
-    await user.enter();
-    await assertThrowsAsync(() => user.say(''), /User must say something/);
-  });
 });
 
