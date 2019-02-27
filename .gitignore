@@ -1,0 +1,10 @@
+# modules
+node_modules
+
+# editors
+.idea
+
+# logs
+npm-debug.log
+/.nyc_output
+/coverage
