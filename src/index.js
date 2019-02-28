@@ -45,6 +45,19 @@ class User {
     await this._sendRequest();
   }
 
+  async press(title, extraProps = {}) {
+    if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
+      throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
+    }
+    const button = this.response.buttons.find(b => b.title === title);
+    if (!button) {
+      const possibleTitles = this.response.buttons.map(b => b.title).join(', ');
+      throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
+    }
+    extraProps = merge({request: {type: 'ButtonPressed', payload: button.payload}}, extraProps);
+    return this.say(button.title, extraProps);
+  }
+
   _buildReqBody(message, extraProps) {
     this._reqBody = merge({
       request: {

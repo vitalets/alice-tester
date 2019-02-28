@@ -35,9 +35,6 @@ exports.createResponse = obj => {
     response: {
       text: 'привет',
       tts: 'прив+ет',
-      buttons: [
-        {title: 'Отлично', hide: true}
-      ],
       end_session: false,
     },
   }, obj);

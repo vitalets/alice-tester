@@ -19,6 +19,7 @@ Node.js библиотека для тестирования навыков Ал
   * [new User(webhookUrl, [extraProps])](#new-userwebhookurl-extraprops)
   * [user.enter([message], [extraProps])](#userentermessage-extraprops)
   * [user.say(message, [extraProps])](#usersaymessage-extraprops)
+  * [user.press(title, [extraProps])](#userpresstitle-extraprops)
   * [user.response](#userresponse)
   * [user.body](#userbody)
   * [user.userId](#useruserid)
@@ -66,7 +67,7 @@ mocha test.js
   * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к каждому запросу.
 
 ### user.enter([message], [extraProps])
-Создание новой сессии пользователя в навыке.  
+Вход пользователя в навык.  
 **Параметры:**
   * **message** `{?String=''}` - фраза, с которой пользователь пришел в навык.
   * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к запросу.
@@ -74,9 +75,19 @@ mocha test.js
 **Returns**: `Promise`
 
 ### user.say(message, [extraProps])
-Отправка сообщения от пользователя в навык.  
+Отправка сообщения от пользователя.  
 **Параметры:**
   * **message** `{String}` - сообщение.
+  * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к запросу.
+
+**Returns**: `Promise`
+
+### user.press(title, [extraProps])
+Нажатие пользователем на кнопку с заданным текстом.
+Если предыдущий запрос не вернул кнопок, то будет ошибка.
+Если предыдущий запрос вернул кнопки с дополнительными данными (payload), то эти данные будут прикреплены к запросу.   
+**Параметры:**
+  * **title** `{String}` - текст кнопки.
   * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к запросу.
 
 **Returns**: `Promise`

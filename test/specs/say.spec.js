@@ -31,7 +31,7 @@ describe('say', () => {
 
     const reqBody2 = createRequest({
       session: {new: false, message_id: 2},
-      request: {command: 'Что ты умеешь?', original_utterance: 'Что ты умеешь?', type: 'ButtonPressed'}
+      request: {command: '2 + 2 равно 4', original_utterance: 'два плюс два равно четыре'}
     });
     const resBody2 = createResponse({response: {text: 'Как дела?'}});
 
@@ -40,7 +40,7 @@ describe('say', () => {
 
     const user = new User('http://localhost');
     await user.enter();
-    await user.say('Что ты умеешь?', {request: {type: 'ButtonPressed'}});
+    await user.say('2 + 2 равно 4', {request: {original_utterance: 'два плюс два равно четыре'}});
 
     scope1.done();
     scope2.done();
@@ -75,16 +75,16 @@ describe('say', () => {
 
     const reqBody2 = createRequest({
       session: {new: false, message_id: 2, user_id: 'custom-user'},
-      request: {command: 'Что ты умеешь?', original_utterance: 'Что ты умеешь?', type: 'ButtonPressed'}
+      request: {command: '2 + 2 равно 4', original_utterance: 'два плюс два равно четыре'}
     });
-    const resBody2 = createResponse({response: {text: 'Как дела?'}});
+    const resBody2 = createResponse({response: {text: 'Ага'}});
 
     const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
     const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
 
     const user = new User('http://localhost', {session: {user_id: 'custom-user'}});
     await user.enter();
-    await user.say('Что ты умеешь?', {request: {type: 'ButtonPressed'}});
+    await user.say('2 + 2 равно 4', {request: {original_utterance: 'два плюс два равно четыре'}});
 
     scope1.done();
     scope2.done();
