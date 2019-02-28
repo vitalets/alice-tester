@@ -6,7 +6,7 @@
 [![license](https://img.shields.io/npm/l/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 
 Node.js библиотека для тестирования навыков Алисы. 
-Позволяет программно эмулировать сообщения пользователя согласно [API протокола](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/)
+Позволяет эмулировать сообщения от пользователя в соответствии с [API](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/)
 и проверять ответы навыка.
 
 ## Содержание
@@ -75,7 +75,7 @@ mocha test.js
 **Returns**: `Promise`
 
 ### user.say(message, [extraProps])
-Отправка сообщения от пользователя.  
+Отправка сообщения в навык.  
 **Параметры:**
   * **message** `{String}` - сообщение.
   * **extraProps** `{?Object}` - объект с полями, которые будут добавлены к запросу.
