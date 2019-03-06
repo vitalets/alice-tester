@@ -46,6 +46,12 @@ class User {
   }
 
   async press(title, extraProps = {}) {
+    // eslint-disable-next-line no-console
+    console.warn('Alice-tester: user.press() is deprecated. Please use user.tap() instead.');
+    return this.tap(title, extraProps);
+  }
+
+  async tap(title, extraProps = {}) {
     if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
       throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
     }
