@@ -39,33 +39,40 @@ class User {
   }
 
   async say(message, extraProps = {}) {
-    this._resBody = null;
-    this._messagesCount++;
-    this._buildReqBody(message, extraProps);
-    await this._sendRequest();
+    await this._sendMessage(message, extraProps);
   }
 
   async press(title, extraProps = {}) {
     // eslint-disable-next-line no-console
     console.warn('Alice-tester: user.press() is deprecated. Please use user.tap() instead.');
-    return this.tap(title, extraProps);
+    await this.tap(title, extraProps);
   }
 
   async tap(title, extraProps = {}) {
     if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
       throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
     }
+
     const button = this.response.buttons.find(b => b.title === title);
     if (!button) {
       const possibleTitles = this.response.buttons.map(b => b.title).join(', ');
       throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
     }
-    extraProps = merge({request: {type: 'ButtonPressed', payload: button.payload}}, extraProps);
-    return this.say(button.title, extraProps);
+
+    const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
+    await this._sendMessage(button.title, buttonExtraProps, extraProps);
   }
 
-  _buildReqBody(message, extraProps) {
-    this._reqBody = merge({
+  async _sendMessage(message, ...extraPropsList) {
+    this._resBody = null;
+    this._messagesCount++;
+    this._buildBaseReqBody(message);
+    [this._extraProps].concat(extraPropsList).forEach(extraProps => this._mergeExtraProps(extraProps));
+    await this._post();
+  }
+
+  _buildBaseReqBody(message) {
+    this._reqBody = {
       request: {
         command: message,
         original_utterance: message,
@@ -87,10 +94,18 @@ class User {
         }
       },
       version: '1.0'
-    }, this._extraProps, extraProps);
+    };
   }
 
-  async _sendRequest() {
+  _mergeExtraProps(extraProps) {
+    if (typeof extraProps === 'function') {
+      extraProps(this._reqBody);
+    } else {
+      merge(this._reqBody, extraProps);
+    }
+  }
+
+  async _post() {
     const headers = {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
