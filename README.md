@@ -15,6 +15,8 @@ Node.js библиотека для автоматического тестир�
 
 - [Установка](#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)
 - [Использование](#%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)
+  * [Один тест](#%D0%BE%D0%B4%D0%B8%D0%BD-%D1%82%D0%B5%D1%81%D1%82)
+  * [Много тестов](#%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [API](#api)
   * [new User(webhookUrl, [extraProps])](#new-userwebhookurl-extraprops)
   * [user.enter([message], [extraProps])](#userentermessage-extraprops)
@@ -34,6 +36,7 @@ npm i alice-tester --save-dev
 ```
 
 ## Использование
+### Один тест
 Если веб-сервер с навыком запущен локально на `http://localhost:3000`, то тест может выглядеть так:
 ```js
 // test.js
@@ -55,8 +58,57 @@ it('should get welcome message', async () => {
 
 Запустить тест можно через [mocha](https://mochajs.org):
 ```bash
-mocha test.js
+$ mocha test.js
+
+  ✓ should get welcome message
+
+  1 passing (34ms)
 ```
+
+### Много тестов
+Когда тестов станет больше, запуск/остановку сервера удобнее вынести в `before/after` хуки:
+```js
+const assert = require('assert');
+const User = require('alice-tester');
+const server = require('./server');
+
+const PORT = 3000;
+
+before(done => {
+  // запускаем сервер навыка
+  server.listen(PORT, done);
+});
+
+it('should get welcome message', async () => {
+  const user = new User(`http://localhost:${PORT}`);
+  const response = await user.enter();
+  assert.equal(response.text, 'Добро пожаловать!');
+});
+
+it('should show help', async () => {
+  const user = new User(`http://localhost:${PORT}`);
+  await user.enter();
+  const response = await user.say('Что ты умеешь?');
+  assert.equal(user.response.text, 'Я умею играть в города.');
+});
+
+after(done => {
+  // останавливаем сервер
+  server.close(done);
+});
+```
+
+Результат:
+```bash
+$ mocha test.js
+
+  ✓ should get welcome message
+  ✓ should show help
+
+  2 passing (37ms)
+```
+
+Более подробно про разработку тестов для навыков можно почитать в [статье на Хабре](https://habr.com/ru/post/441978/). 
 
 ## API
 
