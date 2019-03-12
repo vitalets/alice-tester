@@ -4,6 +4,7 @@
 
 const fetch = require('node-fetch');
 const merge = require('lodash.merge');
+const debug = require('debug')('alice-tester');
 
 class User {
   constructor(webhookUrl, extraProps = {}) {
@@ -111,17 +112,20 @@ class User {
       'Content-Type': 'application/json'
     };
 
-    const response = await fetch(this._webhookUrl, {
-      method: 'post',
-      headers,
-      body: JSON.stringify(this._reqBody),
-    });
+    const body = JSON.stringify(this._reqBody);
 
-    if (!response.ok) {
-      throw new Error(await response.text());
+    debug(`REQUEST: ${body}`);
+
+    const response = await fetch(this._webhookUrl, {method: 'post', headers, body});
+
+    if (response.ok) {
+      this._resBody = await response.json();
+      debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
+    } else {
+      const text = await response.text();
+      debug(`RESPONSE: ${text}`);
+      throw new Error(text);
     }
-
-    this._resBody = await response.json();
   }
 }
 
