@@ -26,6 +26,7 @@ Node.js библиотека для автоматического тестир�
   * [user.body](#userbody)
   * [user.userId](#useruserid)
   * [user.sessionId](#usersessionid)
+- [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [Лицензия](#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 
 <!-- tocstop -->
@@ -57,7 +58,7 @@ it('should get welcome message', async () => {
 ```
 
 Запустить тест можно через [mocha](https://mochajs.org):
-```bash
+```
 $ mocha test.js
 
   ✓ should get welcome message
@@ -99,7 +100,7 @@ after(done => {
 ```
 
 Результат:
-```bash
+```
 $ mocha test.js
 
   ✓ should get welcome message
@@ -155,6 +156,18 @@ $ mocha test.js
 
 ### user.sessionId
 Сгенерированный идентификатор текущей сессии.
+
+## Отладка тестов
+Для отладки тестов можно использовать переменную окружения DEBUG (см [debug](https://github.com/visionmedia/debug)).
+Тогда в консоль будут выводится все отправляемые запросы и ответы:
+```bash
+DEBUG=alice-tester mocha test.js
+```
+В консоли:
+```
+alice-tester REQUEST: {"request":{"command":"","original_utterance":"","type":"SimpleUtterance"},"session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"meta":{"locale":"ru-RU","timezone":"Europe/Moscow","client_id":"ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)","interfaces":{"screen":{}}},"version":"1.0"} +0ms
+alice-tester RESPONSE: {"version":"1.0","session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"response":{"text":"Это приватный навык и недоступен для публичного использования.","tts":"Это приватный навык и недоступен для публичного использования.","end_session":true}} +15ms
+```
 
 ## Лицензия
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)
