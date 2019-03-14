@@ -128,30 +128,5 @@ describe('tap', () => {
       /Кнопка "Ок" не найдена среди возможных кнопок: Да, Нет./
     );
   });
-
-  it('support deprecated user.press() until removed', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
-    const resBody1 = createResponse({
-      response: {buttons: [
-          {title: 'Да'}
-        ]}
-    });
-
-    const reqBody2 = createRequest({
-      session: {new: false, message_id: 2},
-      request: {command: 'Да', original_utterance: 'Да', type: 'ButtonPressed'}
-    });
-    const resBody2 = createResponse();
-
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
-
-    const user = new User('http://localhost');
-    await user.enter();
-    await user.press('Да');
-
-    scope1.done();
-    scope2.done();
-  });
 });
 
