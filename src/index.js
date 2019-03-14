@@ -16,6 +16,7 @@ class User {
     this._messagesCount = 0;
     this._reqBody = null;
     this._resBody = null;
+    debug(`NEW USER for ${webhookUrl}`);
   }
 
   get userId() {
