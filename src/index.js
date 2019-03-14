@@ -5,6 +5,7 @@
 const fetch = require('node-fetch');
 const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
+const constraints = require('./constraints');
 
 class User {
   constructor(webhookUrl, extraProps = {}) {
@@ -121,6 +122,7 @@ class User {
     if (response.ok) {
       this._resBody = await response.json();
       debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
+      constraints.assertResponse(this._resBody);
     } else {
       const text = await response.text();
       debug(`RESPONSE: ${text}`);
