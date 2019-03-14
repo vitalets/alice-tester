@@ -64,7 +64,8 @@ class User {
     this._resBody = null;
     this._messagesCount++;
     this._buildBaseReqBody(message);
-    [this._extraProps].concat(extraPropsList).forEach(extraProps => this._mergeExtraProps(extraProps));
+    this._mergeExtraProps(this._extraProps);
+    extraPropsList.forEach(extraProps => this._mergeExtraProps(extraProps));
     await this._post();
   }
 
