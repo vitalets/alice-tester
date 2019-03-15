@@ -16,15 +16,17 @@ describe('tap', () => {
     });
     const resBody2 = createResponse();
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.tap('Да');
 
-    scope1.done();
-    scope2.done();
+    scope.done();
   });
 
   it('existing button with payload', async () => {
@@ -41,15 +43,17 @@ describe('tap', () => {
     });
     const resBody2 = createResponse();
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.tap('Да');
 
-    scope1.done();
-    scope2.done();
+    scope.done();
   });
 
   it('button with extraProps', async () => {
@@ -66,15 +70,17 @@ describe('tap', () => {
     });
     const resBody2 = createResponse();
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.tap('Да', {request: {markup: {dangerous_context: true}}});
 
-    scope1.done();
-    scope2.done();
+    scope.done();
   });
 
   it('button with extraProps as a function', async () => {
@@ -91,15 +97,17 @@ describe('tap', () => {
     });
     const resBody2 = createResponse();
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.tap('Да', body => body.request.markup = {dangerous_context: true});
 
-    scope1.done();
-    scope2.done();
+    scope.done();
   });
 
   it('throws for missing buttons', async () => {

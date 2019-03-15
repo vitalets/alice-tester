@@ -12,15 +12,17 @@ describe('say', () => {
     });
     const resBody2 = createResponse({response: {text: 'Как дела?'}});
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.say('Что ты умеешь?');
 
-    scope1.done();
-    scope2.done();
+    scope.done();
     assert.deepEqual(user.body, resBody2);
     assert.equal(user.response.text, 'Как дела?');
   });
@@ -35,15 +37,17 @@ describe('say', () => {
     });
     const resBody2 = createResponse({response: {text: 'Как дела?'}});
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost');
     await user.enter();
     await user.say('2 + 2 равно 4', {request: {original_utterance: 'два плюс два равно четыре'}});
 
-    scope1.done();
-    scope2.done();
+    scope.done();
     assert.deepEqual(user.body, resBody2);
   });
 
@@ -57,15 +61,17 @@ describe('say', () => {
     });
     const resBody2 = createResponse({response: {text: 'Как дела?'}});
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost', {session: {user_id: 'custom-user'}});
     await user.enter();
     await user.say('Что ты умеешь?');
 
-    scope1.done();
-    scope2.done();
+    scope.done();
     assert.deepEqual(user.body, resBody2);
   });
 
@@ -79,15 +85,17 @@ describe('say', () => {
     });
     const resBody2 = createResponse({response: {text: 'Ага'}});
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost', {session: {user_id: 'custom-user'}});
     await user.enter();
     await user.say('2 + 2 равно 4', {request: {original_utterance: 'два плюс два равно четыре'}});
 
-    scope1.done();
-    scope2.done();
+    scope.done();
     assert.deepEqual(user.body, resBody2);
   });
 
@@ -101,15 +109,17 @@ describe('say', () => {
     });
     const resBody2 = createResponse({response: {text: 'Ага'}});
 
-    const scope1 = nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    const scope2 = nock('http://localhost').post('/', reqBody2).reply(200, resBody2);
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
 
     const user = new User('http://localhost', body => body.session.user_id = 'custom-user');
     await user.enter();
     await user.say('2 + 2 равно 4', body => body.request.original_utterance = 'два плюс два равно четыре');
 
-    scope1.done();
-    scope2.done();
+    scope.done();
     assert.deepEqual(user.body, resBody2);
   });
 
@@ -122,8 +132,11 @@ describe('say', () => {
       request: {command: 'Что ты умеешь?', original_utterance: 'Что ты умеешь?'}
     });
 
-    nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
-    nock('http://localhost').post('/', reqBody2).reply(500, 'Skill error');
+    nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(500, 'Skill error');
 
     const user = new User('http://localhost');
     await user.enter();
