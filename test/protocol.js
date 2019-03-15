@@ -33,8 +33,7 @@ exports.createRequest = obj => {
 exports.createResponse = obj => {
   return merge({
     response: {
-      text: 'привет',
-      tts: 'прив+ет',
+      text: '',
       end_session: false,
     },
   }, obj);
