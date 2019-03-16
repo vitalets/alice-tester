@@ -35,6 +35,7 @@ class Recorder {
 
   addResponse(response) {
     const key = `${response.text}|${response.tts}`;
+    delete response.end_session;
     this._responses.set(key, response);
   }
 

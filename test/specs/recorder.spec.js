@@ -64,12 +64,10 @@ describe('recorder', () => {
       {
         text: 'Привет!',
         tts: 'Прив+ет!',
-        end_session: false
       },
       {
         text: 'Я умею все!',
         tts: 'Я умею все!',
-        end_session: false
       }
     ]);
   });
