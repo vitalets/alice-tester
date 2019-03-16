@@ -1,5 +1,7 @@
 
 const fs = require('fs');
+const path = require('path');
+const mkdirp = require('mkdirp');
 const {createRequest, createResponse} = require('../protocol');
 const recorder = require('../../src/recorder');
 
@@ -20,6 +22,7 @@ describe('recorder', () => {
 
   it('clear existing file', async () => {
     if (!fs.existsSync(dataFile)) {
+      mkdirp.sync(path.dirname(dataFile));
       fs.writeFileSync(dataFile, '[]', 'utf8');
     }
     recorder.enable(dataFile);
