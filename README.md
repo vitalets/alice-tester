@@ -24,7 +24,7 @@ Node.js библиотека для автоматического тестир�
   * [user.tap(title, [extraProps])](#usertaptitle-extraprops)
   * [user.response](#userresponse)
   * [user.body](#userbody)
-  * [user.userId](#useruserid)
+  * [user.id](#userid)
   * [user.sessionId](#usersessionid)
 - [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [Проверка размеров ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%BE%D0%B2-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
@@ -153,7 +153,7 @@ $ mocha test.js
 ### user.body
 Тело последнего [ответа](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/#response) навыка.
 
-### user.userId
+### user.id
 Сгенерированный идентификатор пользователя.
 
 ### user.sessionId

@@ -20,7 +20,7 @@ class User {
     debug(`NEW USER for ${webhookUrl}`);
   }
 
-  get userId() {
+  get id() {
     return `user-${this._index}`;
   }
 
@@ -79,7 +79,7 @@ class User {
       },
       session: {
         new: this._messagesCount === 1,
-        user_id: this.userId,
+        user_id: this.id,
         session_id: this.sessionId,
         message_id: this._messagesCount,
         skill_id: 'test-skill',
