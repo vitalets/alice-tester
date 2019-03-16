@@ -117,7 +117,7 @@ describe('tap', () => {
     nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
     const user = new User('http://localhost');
     await user.enter();
-    await assertThrowsAsync(() => user.tap('Да'), /Предыдущий запрос не вернул ни одной кнопки/);
+    await assert.rejects(user.tap('Да'), /Предыдущий запрос не вернул ни одной кнопки/);
   });
 
   it('throws for not matched buttons', async () => {
@@ -132,7 +132,7 @@ describe('tap', () => {
     nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
     const user = new User('http://localhost');
     await user.enter();
-    await assertThrowsAsync(() => user.tap('Ок'),
+    await assert.rejects(user.tap('Ок'),
       /Кнопка "Ок" не найдена среди возможных кнопок: Да, Нет./
     );
   });

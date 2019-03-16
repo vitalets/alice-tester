@@ -45,6 +45,7 @@
     "node-fetch": "^2.3.0"
   },
   "devDependencies": {
+    "assert-rejects": "^1.0.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.3",
     "eslint": "^5.6.0",

@@ -140,7 +140,7 @@ describe('say', () => {
 
     const user = new User('http://localhost');
     await user.enter();
-    await assertThrowsAsync(() => user.say('Что ты умеешь?'), /Skill error/);
+    await assert.rejects(user.say('Что ты умеешь?'), /Skill error/);
   });
 });
 
