@@ -1,9 +1,9 @@
 
-const {createRequest, createResponse} = require('../protocol');
+const {createRequest, createEnterRequest, createResponse} = require('../protocol');
 
 describe('tap', () => {
   it('existing button without payload', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
         {title: 'Да'}
@@ -30,7 +30,7 @@ describe('tap', () => {
   });
 
   it('existing button with payload', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
           {title: 'Да', payload: {foo: 1}}
@@ -57,7 +57,7 @@ describe('tap', () => {
   });
 
   it('button with extraProps', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
           {title: 'Да'}
@@ -84,7 +84,7 @@ describe('tap', () => {
   });
 
   it('button with extraProps as a function', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
           {title: 'Да'}
@@ -111,7 +111,7 @@ describe('tap', () => {
   });
 
   it('throws for missing buttons', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse();
 
     nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
@@ -121,7 +121,7 @@ describe('tap', () => {
   });
 
   it('throws for not matched buttons', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
           {title: 'Да'},

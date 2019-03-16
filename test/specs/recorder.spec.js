@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
-const {createRequest, createResponse} = require('../protocol');
+const {createRequest, createEnterRequest, createResponse} = require('../protocol');
 const recorder = require('../../src/recorder');
 
 describe('recorder', () => {
@@ -32,7 +32,7 @@ describe('recorder', () => {
   it('record unique responses', async () => {
     recorder.enable(dataFile);
 
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({response: {text: 'Привет!', tts: 'Прив+ет!'}});
 
     const reqBody2 = createRequest({

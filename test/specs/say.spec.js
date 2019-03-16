@@ -1,9 +1,9 @@
 
-const {createRequest, createResponse} = require('../protocol');
+const {createRequest, createEnterRequest, createResponse} = require('../protocol');
 
 describe('say', () => {
   it('regular', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({
@@ -28,7 +28,7 @@ describe('say', () => {
   });
 
   it('with extraProps', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({
@@ -52,7 +52,7 @@ describe('say', () => {
   });
 
   it('with global extraProps', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1, user_id: 'custom-user'}});
+    const reqBody1 = createEnterRequest({session: {user_id: 'custom-user'}});
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({
@@ -76,7 +76,7 @@ describe('say', () => {
   });
 
   it('with extraProps + global extraProps', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1, user_id: 'custom-user'}});
+    const reqBody1 = createEnterRequest({session: {user_id: 'custom-user'}});
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({
@@ -100,7 +100,7 @@ describe('say', () => {
   });
 
   it('extraProps as a function', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1, user_id: 'custom-user'}});
+    const reqBody1 = createEnterRequest({session: {user_id: 'custom-user'}});
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({
@@ -124,7 +124,7 @@ describe('say', () => {
   });
 
   it('throws for non-200 response', async () => {
-    const reqBody1 = createRequest({session: {new: true, message_id: 1}});
+    const reqBody1 = createEnterRequest();
     const resBody1 = createResponse();
 
     const reqBody2 = createRequest({

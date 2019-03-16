@@ -1,9 +1,9 @@
 
-const {createRequest, createResponse} = require('../protocol');
+const {createEnterRequest, createResponse} = require('../protocol');
 
 describe('constraints', () => {
   it('response text', async () => {
-    const reqBody = createRequest();
+    const reqBody = createEnterRequest();
     const text = 'А'.repeat(1025);
     const resBody = createResponse({response: {text}});
     const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
@@ -16,7 +16,7 @@ describe('constraints', () => {
   });
 
   it('response tts', async () => {
-    const reqBody = createRequest();
+    const reqBody = createEnterRequest();
     const tts = 'А'.repeat(1025);
     const resBody = createResponse({response: {tts}});
     const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
@@ -29,7 +29,7 @@ describe('constraints', () => {
   });
 
   it('response button title', async () => {
-    const reqBody = createRequest();
+    const reqBody = createEnterRequest();
     const buttons = [
       {title: 'Привет'},
       {title: 'А'.repeat(65)},
@@ -45,7 +45,7 @@ describe('constraints', () => {
   });
 
   it('response button url', async () => {
-    const reqBody = createRequest();
+    const reqBody = createEnterRequest();
     const buttons = [
       {title: 'Привет'},
       {title: 'Ссылка', url: 'А'.repeat(1025)},

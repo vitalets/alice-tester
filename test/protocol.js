@@ -10,6 +10,7 @@ exports.createRequest = obj => {
       command: '',
       original_utterance: '',
       type: 'SimpleUtterance',
+      nlu: {},
     },
     session: {
       new: true,
@@ -28,6 +29,13 @@ exports.createRequest = obj => {
     },
     version: '1.0'
   }, obj);
+};
+
+exports.createEnterRequest = obj => {
+  return exports.createRequest(merge({
+    session: {new: true},
+    request: {command: '', original_utterance: 'запусти навык тест'}
+  }, obj));
 };
 
 exports.createResponse = obj => {

@@ -124,7 +124,7 @@ $ mocha test.js
 ### user.enter([message], [extraProps])
 Вход пользователя в навык.  
 **Параметры:**
-  * **message** `{?String=''}` - фраза, с которой пользователь пришел в навык.
+  * **message** `{?String=''}` - фраза, с которой пользователь пришел в навык. При этом в `original_utterance` по умолчанию будет `"запусти навык тест %message%"`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
 **Returns**: `Promise`
@@ -132,7 +132,7 @@ $ mocha test.js
 ### user.say(message, [extraProps])
 Отправка сообщения в навык.  
 **Параметры:**
-  * **message** `{String}` - сообщение.
+  * **message** `{String}` - сообщение. По умолчанию одинаковое в `command` и `original_utterance`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
 **Returns**: `Promise`

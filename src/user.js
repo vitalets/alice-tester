@@ -8,6 +8,8 @@ const debug = require('debug')('alice-tester');
 const constraints = require('./constraints');
 const recorder = require('./recorder');
 
+const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
+
 class User {
   constructor(webhookUrl, extraProps = {}) {
     this._webhookUrl = webhookUrl;
@@ -39,7 +41,8 @@ class User {
   async enter(message = '', extraProps = {}) {
     this._sessionsCount++;
     this._messagesCount = 0;
-    await this.say(message, extraProps);
+    const original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
+    await this._sendMessage(message, {request: {original_utterance}}, extraProps);
   }
 
   async say(message, extraProps = {}) {
@@ -76,6 +79,7 @@ class User {
         command: message,
         original_utterance: message,
         type: 'SimpleUtterance',
+        nlu: {},
       },
       session: {
         new: this._messagesCount === 1,

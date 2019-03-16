@@ -5,11 +5,13 @@ describe('enter', () => {
   it('without message', async () => {
     const reqBody = createRequest({
       session: {new: true},
-      request: {command: '', original_utterance: ''}
+      request: {command: '', original_utterance: 'запусти навык тест'}
     });
     const resBody = createResponse({response: {text: 'Привет'}});
 
-    const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
+    const scope = nock('http://localhost')
+      .post('/', reqBody)
+      .reply(200, resBody);
 
     const user = new User('http://localhost');
     await user.enter();
@@ -22,14 +24,14 @@ describe('enter', () => {
   it('with message', async () => {
     const reqBody = createRequest({
       session: {new: true},
-      request: {command: 'Здравствуйте', original_utterance: 'Здравствуйте'}
+      request: {command: 'куку', original_utterance: 'запусти навык тест куку'}
     });
     const resBody = createResponse({response: {text: 'Привет'}});
 
     const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
 
     const user = new User('http://localhost');
-    await user.enter('Здравствуйте');
+    await user.enter('куку');
 
     scope.done();
     assert.deepEqual(user.body, resBody);
@@ -38,14 +40,16 @@ describe('enter', () => {
   it('with extraProps + global extraProps', async () => {
     const reqBody = createRequest({
       session: {new: true, user_id: 'custom-user'},
-      request: {command: '', original_utterance: 'запусти навык тест'}
+      request: {command: 'пицца', original_utterance: 'запусти навык тест пицца', nlu: {tokens: ['пицца']}}
     });
     const resBody = createResponse({response: {text: 'Привет'}});
 
-    const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
+    const scope = nock('http://localhost')
+      .post('/', reqBody)
+      .reply(200, resBody);
 
     const user = new User('http://localhost', {session: {user_id: 'custom-user'}});
-    await user.enter('', {request: {original_utterance: 'запусти навык тест'}});
+    await user.enter('пицца', {request: {nlu: {tokens: ['пицца']}}});
 
     scope.done();
     assert.deepEqual(user.body, resBody);
@@ -55,14 +59,14 @@ describe('enter', () => {
   it('extraProps as a function', async () => {
     const reqBody = createRequest({
       session: {new: true, user_id: 'custom-user'},
-      request: {command: '', original_utterance: 'запусти навык тест'}
+      request: {command: 'пицца', original_utterance: 'запусти навык тест пицца', nlu: {tokens: ['пицца']}}
     });
     const resBody = createResponse({response: {text: 'Привет'}});
 
     const scope = nock('http://localhost').post('/', reqBody).reply(200, resBody);
 
     const user = new User('http://localhost', body => body.session.user_id = 'custom-user');
-    await user.enter('', body => body.request.original_utterance = 'запусти навык тест');
+    await user.enter('пицца', body => body.request.nlu.tokens = ['пицца']);
 
     scope.done();
     assert.deepEqual(user.body, resBody);
