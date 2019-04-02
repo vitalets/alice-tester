@@ -42,11 +42,11 @@ class User {
     this._sessionsCount++;
     this._messagesCount = 0;
     const original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
-    await this._sendMessage(message, {request: {original_utterance}}, extraProps);
+    return this._sendMessage(message, {request: {original_utterance}}, extraProps);
   }
 
   async say(message, extraProps = {}) {
-    await this._sendMessage(message, extraProps);
+    return this._sendMessage(message, extraProps);
   }
 
   async tap(title, extraProps = {}) {
@@ -61,7 +61,7 @@ class User {
     }
 
     const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
-    await this._sendMessage(button.title, buttonExtraProps, extraProps);
+    return this._sendMessage(button.title, buttonExtraProps, extraProps);
   }
 
   async _sendMessage(message, ...extraPropsList) {
@@ -70,7 +70,7 @@ class User {
     this._buildBaseReqBody(message);
     this._mergeExtraProps(this._extraProps);
     extraPropsList.forEach(extraProps => this._mergeExtraProps(extraProps));
-    await this._post();
+    return this._post();
   }
 
   _buildBaseReqBody(message) {
@@ -113,18 +113,10 @@ class User {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     };
-
     const body = JSON.stringify(this._reqBody);
-
     debug(`REQUEST: ${body}`);
-
     const response = await fetch(this._webhookUrl, {method: 'post', headers, body});
-
-    if (response.ok) {
-      await this._handleSuccess(response);
-    } else {
-      await this._handleError(response);
-    }
+    return response.ok ? this._handleSuccess(response) : this._handleError(response);
   }
 
   async _handleSuccess(response) {
@@ -134,6 +126,7 @@ class User {
       recorder.addResponse(this._resBody.response);
     }
     constraints.assertResponse(this._resBody);
+    return this._resBody.response;
   }
 
   async _handleError(response) {

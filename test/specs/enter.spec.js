@@ -14,11 +14,12 @@ describe('enter', () => {
       .reply(200, resBody);
 
     const user = new User('http://localhost');
-    await user.enter();
+    const response = await user.enter();
 
     scope.done();
     assert.deepEqual(user.body, resBody);
     assert.equal(user.response.text, 'Привет');
+    assert.deepEqual(user.response, response);
   });
 
   it('with message', async () => {

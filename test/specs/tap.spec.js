@@ -24,9 +24,10 @@ describe('tap', () => {
 
     const user = new User('http://localhost');
     await user.enter();
-    await user.tap('Да');
+    const response = await user.tap('Да');
 
     scope.done();
+    assert.deepEqual(user.response, response);
   });
 
   it('existing button with payload', async () => {

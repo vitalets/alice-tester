@@ -20,11 +20,12 @@ describe('say', () => {
 
     const user = new User('http://localhost');
     await user.enter();
-    await user.say('Что ты умеешь?');
+    const response = await user.say('Что ты умеешь?');
 
     scope.done();
     assert.deepEqual(user.body, resBody2);
     assert.equal(user.response.text, 'Как дела?');
+    assert.deepEqual(user.response, response);
   });
 
   it('with extraProps', async () => {

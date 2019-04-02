@@ -131,10 +131,10 @@ $ mocha test.js
 ### user.enter([message], [extraProps])
 Вход пользователя в навык.  
 **Параметры:**
-  * **message** `{?String=''}` - фраза, с которой пользователь пришел в навык. При этом в `original_utterance` по умолчанию будет `"запусти навык тест %message%"`.
+  * **message** `{?String=''}` - фраза, с которой пользователь пришел в навык. При этом в `original_utterance` по умолчанию будет `"запусти навык тест {message}"`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
-**Returns**: `Promise`
+**Returns**: `Promise<response>`
 
 ### user.say(message, [extraProps])
 Отправка сообщения в навык.  
@@ -142,7 +142,7 @@ $ mocha test.js
   * **message** `{String}` - сообщение. По умолчанию одинаковое в `command` и `original_utterance`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
-**Returns**: `Promise`
+**Returns**: `Promise<response>`
 
 ### user.tap(title, [extraProps])
 Нажатие пользователем на кнопку с заданным текстом.
@@ -152,7 +152,7 @@ $ mocha test.js
   * **title** `{String}` - текст кнопки.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
-**Returns**: `Promise`
+**Returns**: `Promise<response>`
 
 ### user.response
 Поле `response` из последнего [ответа](https://tech.yandex.ru/dialogs/alice/doc/protocol-docpage/#response) навыка.
