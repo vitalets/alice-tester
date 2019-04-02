@@ -127,9 +127,7 @@ class User {
   async _handleSuccess(response) {
     this._resBody = await response.json();
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
-    if (recorder.enabled) {
-      recorder.addResponse(this._resBody.response);
-    }
+    recorder.handleResponse(this._resBody.response);
     constraints.assertResponse(this._resBody);
     return this._resBody.response;
   }

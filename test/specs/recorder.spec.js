@@ -1,36 +1,25 @@
 
 const fs = require('fs');
 const path = require('path');
-const mkdirp = require('mkdirp');
+const rimraf = require('rimraf');
 const {createRequest, createEnterRequest, createResponse} = require('../protocol');
+const config = require('../../src/config');
 const recorder = require('../../src/recorder');
 
 describe('recorder', () => {
 
-  const dataFile = '.temp/responses.json';
+  const file = '.temp/responses.json';
+
+  beforeEach(() => {
+    rimraf.sync(path.dirname(file));
+  });
 
   afterEach(() => {
-    recorder.disable();
-  });
-
-  it('enable/disable', async () => {
-    recorder.enable(dataFile);
-    assert.ok(recorder.enabled);
-    recorder.disable();
-    assert.notOk(recorder.enabled);
-  });
-
-  it('clear existing file', async () => {
-    if (!fs.existsSync(dataFile)) {
-      mkdirp.sync(path.dirname(dataFile));
-      fs.writeFileSync(dataFile, '[]', 'utf8');
-    }
-    recorder.enable(dataFile);
-    assert.notOk(fs.existsSync(dataFile));
+    config.recorderFile = '';
   });
 
   it('record unique responses', async () => {
-    recorder.enable(dataFile);
+    config.recorderFile = file;
 
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({response: {text: 'Привет!', tts: 'Прив+ет!'}});
@@ -60,7 +49,7 @@ describe('recorder', () => {
 
     recorder._save();
 
-    const responses = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+    const responses = JSON.parse(fs.readFileSync(file, 'utf8'));
 
     scope.done();
     assert.deepEqual(responses, [
@@ -73,6 +62,25 @@ describe('recorder', () => {
         tts: 'Я умею все!',
       }
     ]);
+  });
+
+  it('dont record if not enabled', async () => {
+    config.recorderFile = '';
+
+    const reqBody1 = createEnterRequest();
+    const resBody1 = createResponse({response: {text: 'Привет!', tts: 'Прив+ет!'}});
+
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1);
+
+    const user = new User('http://localhost');
+    await user.enter();
+
+    recorder._save();
+
+    scope.done();
+    assert.notOk(fs.existsSync(file));
   });
 
 });

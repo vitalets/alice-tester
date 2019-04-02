@@ -6,56 +6,48 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 const debug = require('debug')('alice-tester:recorder');
+const config = require('./config');
 
 class Recorder {
   constructor() {
-    this._file = null;
     this._responses = new Map();
-    this._save = this._save.bind(this);
+    process.on('exit', () => this._save());
   }
 
-  get enabled() {
-    return Boolean(this._file);
+  static get file() {
+    return config.recorderFile;
   }
 
-  enable(file) {
-    this._file = file;
-    debug(`enabled for file: ${this._file}`);
-    if (fs.existsSync(this._file)) {
-      fs.unlinkSync(this._file);
+  static get enabled() {
+    return Boolean(Recorder.file);
+  }
+
+  static _ensureDir() {
+    const dir = path.dirname(Recorder.file);
+    mkdirp.sync(dir);
+  }
+
+  handleResponse(response) {
+    if (Recorder.enabled) {
+      const key = `${response.text}|${response.tts}`;
+      delete response.end_session;
+      this._responses.set(key, response);
     }
-    process.on('exit', this._save);
-  }
-
-  disable() {
-    this._file = null;
-    debug(`disabled.`);
-    process.removeListener('exit', this._save);
-  }
-
-  addResponse(response) {
-    const key = `${response.text}|${response.tts}`;
-    delete response.end_session;
-    this._responses.set(key, response);
   }
 
   _save() {
-    const items = Array.from(this._responses.values());
-    if (this._file) {
-      items.sort((a, b) => (a.text || '').localeCompare(b.text));
-      const content = JSON.stringify(items, false, 2);
-      this._ensureDir();
-      fs.writeFileSync(this._file, content);
-      debug(`saved ${items.length} response(s) in ${this._file}`);
-    } else {
-      /* istanbul ignore next */
-      debug(`Can't save ${items.length} response(s) because no file specified.`);
+    if (Recorder.enabled) {
+      Recorder._ensureDir();
+      const content = this._buildContent();
+      fs.writeFileSync(Recorder.file, content);
+      debug(`Saved ${this._responses.size} response(s) in ${Recorder.file}`);
     }
   }
 
-  _ensureDir() {
-    const dir = path.dirname(this._file);
-    mkdirp.sync(dir);
+  _buildContent() {
+    const items = Array.from(this._responses.values());
+    items.sort((a, b) => (a.text || '').localeCompare(b.text));
+    return JSON.stringify(items, false, 2);
   }
 }
 
