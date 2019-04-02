@@ -84,14 +84,14 @@ before(done => {
 
 it('should get welcome message', async () => {
   const user = new User(`http://localhost:${PORT}`);
-  const response = await user.enter();
-  assert.equal(response.text, 'Добро пожаловать!');
+  await user.enter();
+  assert.equal(user.response.text, 'Добро пожаловать!');
 });
 
 it('should show help', async () => {
   const user = new User(`http://localhost:${PORT}`);
   await user.enter();
-  const response = await user.say('Что ты умеешь?');
+  await user.say('Что ты умеешь?');
   assert.equal(user.response.text, 'Я умею играть в города.');
 });
 
