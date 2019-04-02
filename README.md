@@ -125,7 +125,7 @@ $ mocha test.js
 ### new User(webhookUrl, [extraProps])
 Создание нового пользователя для теста.  
 **Параметры:**
-  * **webhookUrl** `{String}` - вебхук-урл навыка.
+  * **webhookUrl** `{String|http.Server}` - вебхук-урл навыка в виде строки или инстанса `http.Server`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к каждому запросу, либо функция модификации тела запроса.
 
 ### user.enter([message], [extraProps])

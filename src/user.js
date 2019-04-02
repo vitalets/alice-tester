@@ -11,8 +11,12 @@ const recorder = require('./recorder');
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
 class User {
+  /**
+   * @param {String|http.Server} webhookUrl
+   * @param {Object|Function} [extraProps]
+   */
   constructor(webhookUrl, extraProps = {}) {
-    this._webhookUrl = webhookUrl;
+    this._setWebhookUrl(webhookUrl);
     this._extraProps = extraProps;
     this._index = ++User.counter;
     this._sessionsCount = 0;
@@ -133,6 +137,16 @@ class User {
     const text = await response.text();
     debug(`RESPONSE: ${text}`);
     throw new Error(text);
+  }
+
+  _setWebhookUrl(webhookUrl) {
+    if (typeof webhookUrl === 'string') {
+      this._webhookUrl = webhookUrl;
+    } else {
+      const {address, port} = webhookUrl.address();
+      const ip = ['0.0.0.0', '::'].includes(address) ? 'localhost' : address;
+      this._webhookUrl = `http://${ip}:${port}`;
+    }
   }
 }
 
