@@ -15,8 +15,6 @@ Node.js библиотека для автоматического тестир�
 
 - [Установка](#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)
 - [Использование](#%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)
-  * [Один тест](#%D0%BE%D0%B4%D0%B8%D0%BD-%D1%82%D0%B5%D1%81%D1%82)
-  * [Много тестов](#%D0%BC%D0%BD%D0%BE%D0%B3%D0%BE-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [API](#api)
   * [new User(webhookUrl, [extraProps])](#new-userwebhookurl-extraprops)
   * [user.enter([message], [extraProps])](#userentermessage-extraprops)
@@ -39,23 +37,16 @@ npm i alice-tester --save-dev
 ```
 
 ## Использование
-### Один тест
 Если веб-сервер с навыком запущен локально на `http://localhost:3000`, то тест может выглядеть так:
 ```js
-// test.js
 const assert = require('assert');
 const User = require('alice-tester');
 
 it('should get welcome message', async () => {
-  const user = new User('http://localhost:3000'); // создаем пользователя
-
-  await user.enter(); // пользователь заходит в навык
-  assert.equal(user.response.text, 'Добро пожаловать!'); // проверяем, что навык нас поприветствовал
+  const user = new User('http://localhost:3000');
+  await user.enter();
   
-  await user.say('Что ты умеешь?'); // отправляем сообщение в навык
-  assert.equal(user.response.text, 'Я умею играть в города.'); // проверяем, что навык ответил верно (текстом)
-  assert.equal(user.response.tts, 'Я умею играть в город+а.'); // проверяем, что навык ответил верно (голосом)
-  assert.deepEqual(user.response.buttons, [{title: 'Помощь', hide: true}]); // проверяем, что навык нарисовал правильные кнопки
+  assert.equal(user.response.text, 'Добро пожаловать!');
 });
 ```
 
@@ -68,8 +59,24 @@ $ mocha test.js
   1 passing (34ms)
 ```
 
-### Много тестов
-Когда тестов станет больше, запуск/остановку сервера удобнее вынести в `before/after` хуки:
+Дальше можно добавить тест взаимодействия с навыком.
+Спросить пользователем `"Что ты умеешь?"` и проверить текстово-голосовой ответ и кнопки:
+```js
+const assert = require('assert');
+const User = require('alice-tester');
+
+it('should show help', async () => {
+  const user = new User('http://localhost:3000');
+  await user.enter();
+  await user.say('Что ты умеешь?');
+
+  assert.equal(user.response.text, 'Я умею играть в города.');
+  assert.equal(user.response.tts, 'Я умею играть в город+а.');
+  assert.deepEqual(user.response.buttons, [{title: 'Понятно', hide: true}]);
+});
+```
+
+Когда тестов станет больше, запуск/остановку сервера удобно вынести в `before/after` хуки:
 ```js
 const assert = require('assert');
 const User = require('alice-tester');
@@ -78,13 +85,17 @@ const server = require('./server');
 const PORT = 3000;
 
 before(done => {
-  // запускаем сервер навыка
   server.listen(PORT, done);
+});
+
+after(done => {
+  server.close(done);
 });
 
 it('should get welcome message', async () => {
   const user = new User(`http://localhost:${PORT}`);
   await user.enter();
+
   assert.equal(user.response.text, 'Добро пожаловать!');
 });
 
@@ -92,12 +103,8 @@ it('should show help', async () => {
   const user = new User(`http://localhost:${PORT}`);
   await user.enter();
   await user.say('Что ты умеешь?');
-  assert.equal(user.response.text, 'Я умею играть в города.');
-});
 
-after(done => {
-  // останавливаем сервер
-  server.close(done);
+  assert.equal(user.response.text, 'Я умею играть в города.');
 });
 ```
 
