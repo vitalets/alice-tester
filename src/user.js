@@ -7,6 +7,7 @@ const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
 const constraints = require('./constraints');
 const recorder = require('./recorder');
+const config = require('./config');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
@@ -18,7 +19,7 @@ class User {
   constructor(webhookUrl, extraProps = {}) {
     this._setWebhookUrl(webhookUrl);
     this._extraProps = extraProps;
-    this._index = ++User.counter;
+    this._setUserId();
     this._sessionsCount = 0;
     this._messagesCount = 0;
     this._reqBody = null;
@@ -27,7 +28,7 @@ class User {
   }
 
   get id() {
-    return `user-${this._index}`;
+    return `user-${this._id}`;
   }
 
   get sessionId() {
@@ -148,8 +149,14 @@ class User {
       this._webhookUrl = `http://${ip}:${port}`;
     }
   }
+
+  _setUserId() {
+    this._id = (this._extraProps && this._extraProps.session && this._extraProps.session.user_id)
+      ? this._extraProps.session.user_id
+      : config.generateUserId();
+  }
 }
 
-User.counter = 0;
+User.config = config;
 
 module.exports = User;

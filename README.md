@@ -16,6 +16,7 @@ Node.js библиотека для автоматического тестир�
 - [Установка](#%D1%83%D1%81%D1%82%D0%B0%D0%BD%D0%BE%D0%B2%D0%BA%D0%B0)
 - [Использование](#%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5)
 - [API](#api)
+  * [User.config](#userconfig)
   * [new User(webhookUrl, [extraProps])](#new-userwebhookurl-extraprops)
   * [user.enter([message], [extraProps])](#userentermessage-extraprops)
   * [user.say(message, [extraProps])](#usersaymessage-extraprops)
@@ -121,6 +122,12 @@ $ mocha test.js
 Более подробно про разработку тестов для навыков можно почитать в [статье на Хабре](https://habr.com/ru/post/441978/). 
 
 ## API
+
+### User.config
+Глобальный конфиг класса `User`.  
+**Значения:**
+  * **generateUserId** `{Function}` - функция генерации `userId`. По умолчанию: `` () => `${Date.now()}-${Math.random()}` ``
+
 
 ### new User(webhookUrl, [extraProps])
 Создание нового пользователя для теста.  

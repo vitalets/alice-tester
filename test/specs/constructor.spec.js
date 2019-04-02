@@ -35,4 +35,20 @@ describe('constructor', () => {
     assert.equal(user.response.text, '');
   });
 
+  it('unique user ids', async () => {
+    sinon.restore();
+
+    const user1 = new User(server);
+    const user2 = new User(server);
+    const user3 = new User(server);
+
+    assert.notEqual(user1.id, user2.id);
+    assert.notEqual(user1.id, user3.id);
+    assert.notEqual(user2.id, user3.id);
+  });
+
+  it('should return userId from extraProps', async () => {
+    const user = new User('http://localhost', {session: {user_id: 'foo'}});
+    assert.equal(user.id, 'user-foo');
+  });
 });
