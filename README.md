@@ -230,7 +230,7 @@ alice-tester RESPONSE: {"version":"1.0","session":{"new":true,"user_id":"user-1"
 ```
 
 ## История версий
- * [0.5.0](https://github.com/vitalets/alice-tester/milestone/1)
+ * [0.5.0](https://github.com/vitalets/alice-tester/milestone/1?closed=1)
 
 ## Лицензия
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)
