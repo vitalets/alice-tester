@@ -5,12 +5,6 @@ const defaults = {
    * @type {Function}
    */
   generateUserId: () => `${Date.now()}-${Math.random()}`,
-
-  /**
-   * File to record responses.
-   * @type {String}
-   */
-  recorderFile: '',
 };
 
 module.exports = {...defaults};

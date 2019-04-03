@@ -127,14 +127,11 @@ $ mocha test.js
 ### User.config
 Глобальный конфиг класса `User`:
   * **generateUserId** `{Function}` - функция генерации `userId`. По умолчанию: `` () => `${Date.now()}-${Math.random()}` ``
-  * **recorderFile** `{String}` - путь к файлу для записи ответов. По умолчанию: `""`
 
 Пример:
 ```js
 User.config.generateUserId = () => Date.now();
-User.config.recorderFile = 'temp/responses.json';
 ```
-
 
 ### new User(webhookUrl, [extraProps])
 Создание нового пользователя для теста.  
@@ -202,13 +199,13 @@ Length of response.text (1049) is greater than allowed (1024): События р
 ```
 
 ## Запись ответов в файл
-Если при запуске тестов указать параметр `User.config.recorderFile`, то все уникальные ответы навыка
-будут записаны в этот файл:
-```js
-User.config.recorderFile = 'temp/responses.json'
+Если при запуске тестов указать переменную окружения `ALICE_TESTER_RECORD=path/to/file.json`,
+то все уникальные ответы навыка будут записаны в этот файл:
+```
+ALICE_TESTER_RECORD=responses.json mocha test.js
 ```
 
-Пример полученного файла `temp/responses.json`:
+Пример полученного `responses.json`:
 ```json
 [
   {

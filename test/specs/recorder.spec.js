@@ -3,7 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
 const {createRequest, createEnterRequest, createResponse} = require('../protocol');
-const config = require('../../src/config');
 const recorder = require('../../src/recorder');
 
 describe('recorder', () => {
@@ -15,11 +14,11 @@ describe('recorder', () => {
   });
 
   afterEach(() => {
-    config.recorderFile = '';
+    recorder.file = '';
   });
 
   it('record unique responses', async () => {
-    config.recorderFile = file;
+    recorder.file = file;
 
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({response: {text: 'Привет!', tts: 'Прив+ет!'}});
@@ -65,7 +64,7 @@ describe('recorder', () => {
   });
 
   it('dont record if not enabled', async () => {
-    config.recorderFile = '';
+    recorder.file = '';
 
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({response: {text: 'Привет!', tts: 'Прив+ет!'}});

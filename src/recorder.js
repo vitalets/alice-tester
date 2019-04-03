@@ -6,29 +6,27 @@ const fs = require('fs');
 const path = require('path');
 const mkdirp = require('mkdirp');
 const debug = require('debug')('alice-tester:recorder');
-const config = require('./config');
 
 class Recorder {
   constructor() {
+    this._file = '';
     this._responses = new Map();
     process.on('exit', () => this._save());
   }
 
-  static get file() {
-    return config.recorderFile;
+  set file(file) {
+    this._file = file;
+    if (this._file) {
+      debug(`Recording to file: ${this._file}`);
+    }
   }
 
-  static get enabled() {
-    return Boolean(Recorder.file);
-  }
-
-  static _ensureDir() {
-    const dir = path.dirname(Recorder.file);
-    mkdirp.sync(dir);
+  get _enabled() {
+    return Boolean(this._file);
   }
 
   handleResponse(response) {
-    if (Recorder.enabled) {
+    if (this._enabled) {
       const key = `${response.text}|${response.tts}`;
       delete response.end_session;
       this._responses.set(key, response);
@@ -36,11 +34,11 @@ class Recorder {
   }
 
   _save() {
-    if (Recorder.enabled) {
-      Recorder._ensureDir();
+    if (this._enabled) {
+      this._ensureDir();
       const content = this._buildContent();
-      fs.writeFileSync(Recorder.file, content);
-      debug(`Saved ${this._responses.size} response(s) in ${Recorder.file}`);
+      fs.writeFileSync(this._file, content);
+      debug(`Saved ${this._responses.size} response(s) to file: ${this._file}`);
     }
   }
 
@@ -48,6 +46,11 @@ class Recorder {
     const items = Array.from(this._responses.values());
     items.sort((a, b) => (a.text || '').localeCompare(b.text));
     return JSON.stringify(items, false, 2);
+  }
+
+  _ensureDir() {
+    const dir = path.dirname(this._file);
+    mkdirp.sync(dir);
   }
 }
 
