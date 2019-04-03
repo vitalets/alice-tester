@@ -6,8 +6,8 @@
   "globals": {
     "assert": false,
     "nock": false,
-    "User": false,
-    "assertThrowsAsync": false
+    "sinon": false,
+    "User": false
   },
 
   "plugins": [

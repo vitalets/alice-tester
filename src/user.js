@@ -7,23 +7,29 @@ const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
 const constraints = require('./constraints');
 const recorder = require('./recorder');
+const config = require('./config');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
 class User {
+  /**
+   * @param {String|http.Server} webhookUrl
+   * @param {Object|Function} [extraProps]
+   */
   constructor(webhookUrl, extraProps = {}) {
-    this._webhookUrl = webhookUrl;
+    this._setWebhookUrl(webhookUrl);
     this._extraProps = extraProps;
-    this._index = ++User.counter;
+    this._setUserId();
     this._sessionsCount = 0;
     this._messagesCount = 0;
+    this._reqTimestamp = 0;
     this._reqBody = null;
     this._resBody = null;
     debug(`NEW USER for ${webhookUrl}`);
   }
 
   get id() {
-    return `user-${this._index}`;
+    return this._id;
   }
 
   get sessionId() {
@@ -42,11 +48,11 @@ class User {
     this._sessionsCount++;
     this._messagesCount = 0;
     const original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
-    await this._sendMessage(message, {request: {original_utterance}}, extraProps);
+    return this._sendMessage(message, {request: {original_utterance}}, extraProps);
   }
 
   async say(message, extraProps = {}) {
-    await this._sendMessage(message, extraProps);
+    return this._sendMessage(message, extraProps);
   }
 
   async tap(title, extraProps = {}) {
@@ -61,7 +67,7 @@ class User {
     }
 
     const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
-    await this._sendMessage(button.title, buttonExtraProps, extraProps);
+    return this._sendMessage(button.title, buttonExtraProps, extraProps);
   }
 
   async _sendMessage(message, ...extraPropsList) {
@@ -70,7 +76,7 @@ class User {
     this._buildBaseReqBody(message);
     this._mergeExtraProps(this._extraProps);
     extraPropsList.forEach(extraProps => this._mergeExtraProps(extraProps));
-    await this._post();
+    return this._post();
   }
 
   _buildBaseReqBody(message) {
@@ -113,27 +119,20 @@ class User {
       'Accept': 'application/json',
       'Content-Type': 'application/json'
     };
-
     const body = JSON.stringify(this._reqBody);
-
     debug(`REQUEST: ${body}`);
-
+    this._reqTimestamp = Date.now();
     const response = await fetch(this._webhookUrl, {method: 'post', headers, body});
-
-    if (response.ok) {
-      await this._handleSuccess(response);
-    } else {
-      await this._handleError(response);
-    }
+    return response.ok ? this._handleSuccess(response) : this._handleError(response);
   }
 
   async _handleSuccess(response) {
     this._resBody = await response.json();
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
-    if (recorder.enabled) {
-      recorder.addResponse(this._resBody.response);
-    }
+    recorder.handleResponse(this._resBody.response);
     constraints.assertResponse(this._resBody);
+    this._assertResponseTime();
+    return this._resBody.response;
   }
 
   async _handleError(response) {
@@ -141,8 +140,31 @@ class User {
     debug(`RESPONSE: ${text}`);
     throw new Error(text);
   }
+
+  _setWebhookUrl(webhookUrl) {
+    if (typeof webhookUrl === 'string') {
+      this._webhookUrl = webhookUrl;
+    } else {
+      const {address, port} = webhookUrl.address();
+      const ip = ['0.0.0.0', '::'].includes(address) ? 'localhost' : address;
+      this._webhookUrl = `http://${ip}:${port}`;
+    }
+  }
+
+  _setUserId() {
+    this._id = (this._extraProps && this._extraProps.session && this._extraProps.session.user_id)
+      ? this._extraProps.session.user_id
+      : config.generateUserId();
+  }
+
+  _assertResponseTime() {
+    const responseTime = Date.now() - this._reqTimestamp;
+    if (config.responseTimeout && responseTime > config.responseTimeout) {
+      throw new Error(`Response time (${responseTime} ms) exceeded timeout (${config.responseTimeout} ms)`);
+    }
+  }
 }
 
-User.counter = 0;
+User.config = config;
 
 module.exports = User;

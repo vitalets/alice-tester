@@ -20,11 +20,12 @@ describe('say', () => {
 
     const user = new User('http://localhost');
     await user.enter();
-    await user.say('Что ты умеешь?');
+    const response = await user.say('Что ты умеешь?');
 
     scope.done();
     assert.deepEqual(user.body, resBody2);
     assert.equal(user.response.text, 'Как дела?');
+    assert.deepEqual(user.response, response);
   });
 
   it('with extraProps', async () => {
@@ -141,6 +142,29 @@ describe('say', () => {
     const user = new User('http://localhost');
     await user.enter();
     await assert.rejects(user.say('Что ты умеешь?'), /Skill error/);
+  });
+
+  it('throws for timeout', async () => {
+    User.config.responseTimeout = 100;
+    const reqBody1 = createEnterRequest();
+    const resBody1 = createResponse();
+    const reqBody2 = createRequest({
+      session: {new: false, message_id: 2},
+      request: {command: 'Что ты умеешь?', original_utterance: 'Что ты умеешь?'}
+    });
+    const resBody2 = createResponse();
+
+    nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .delay(150)
+      .reply(200, resBody2);
+
+    const user = new User('http://localhost');
+    await user.enter();
+
+    await assert.rejects(user.say('Что ты умеешь?'), /Response time \(\d+ ms\) exceeded timeout \(100 ms\)/);
   });
 });
 

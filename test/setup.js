@@ -10,6 +10,9 @@ global.nock = nock;
 global.User = User;
 
 beforeEach(() => {
-  // reset counter before each test to have consistent requests
-  User.counter = 0;
+  User.config.generateUserId = () => 'user-1';
+});
+
+afterEach(() => {
+  User.config.restore();
 });
