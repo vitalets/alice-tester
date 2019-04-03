@@ -22,13 +22,14 @@ class User {
     this._setUserId();
     this._sessionsCount = 0;
     this._messagesCount = 0;
+    this._reqTimestamp = 0;
     this._reqBody = null;
     this._resBody = null;
     debug(`NEW USER for ${webhookUrl}`);
   }
 
   get id() {
-    return `user-${this._id}`;
+    return this._id;
   }
 
   get sessionId() {
@@ -120,6 +121,7 @@ class User {
     };
     const body = JSON.stringify(this._reqBody);
     debug(`REQUEST: ${body}`);
+    this._reqTimestamp = Date.now();
     const response = await fetch(this._webhookUrl, {method: 'post', headers, body});
     return response.ok ? this._handleSuccess(response) : this._handleError(response);
   }
@@ -129,6 +131,7 @@ class User {
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     recorder.handleResponse(this._resBody.response);
     constraints.assertResponse(this._resBody);
+    this._assertResponseTime();
     return this._resBody.response;
   }
 
@@ -152,6 +155,13 @@ class User {
     this._id = (this._extraProps && this._extraProps.session && this._extraProps.session.user_id)
       ? this._extraProps.session.user_id
       : config.generateUserId();
+  }
+
+  _assertResponseTime() {
+    const responseTime = Date.now() - this._reqTimestamp;
+    if (config.responseTimeout && responseTime > config.responseTimeout) {
+      throw new Error(`Response time (${responseTime} ms) exceeded timeout (${config.responseTimeout} ms)`);
+    }
   }
 }
 

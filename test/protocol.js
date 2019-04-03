@@ -14,7 +14,7 @@ exports.createRequest = obj => {
     },
     session: {
       new: true,
-      user_id: 'user-1-0.5',
+      user_id: 'user-1',
       session_id: 'session-1',
       message_id: 1,
       skill_id: 'test-skill',

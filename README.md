@@ -25,9 +25,10 @@ Node.js библиотека для автоматического тестир�
   * [user.body](#userbody)
   * [user.id](#userid)
   * [user.sessionId](#usersessionid)
-- [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
+- [Проверка времени ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
 - [Проверка размеров ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%BE%D0%B2-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
 - [Запись ответов в файл](#%D0%B7%D0%B0%D0%BF%D0%B8%D1%81%D1%8C-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%BE%D0%B2-%D0%B2-%D1%84%D0%B0%D0%B9%D0%BB)
+- [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [История версий](#%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D0%B9)
 - [Лицензия](#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 
@@ -127,10 +128,12 @@ $ mocha test.js
 ### User.config
 Глобальный конфиг класса `User`:
   * **generateUserId** `{Function}` - функция генерации `userId`. По умолчанию: `` () => `${Date.now()}-${Math.random()}` ``
+  * **responseTimeout** `{Number}` - таймаут для ответа навыка (мс). По умолчанию: `1000`
 
 Пример:
 ```js
 User.config.generateUserId = () => Date.now();
+User.config.responseTimeout = 500;
 ```
 
 ### new User(webhookUrl, [extraProps])
@@ -177,17 +180,12 @@ User.config.generateUserId = () => Date.now();
 ### user.sessionId
 Сгенерированный идентификатор текущей сессии.
 
-## Отладка тестов
-Для отладки тестов можно использовать переменную окружения DEBUG (см [debug](https://github.com/visionmedia/debug)).
-Тогда в консоль будут выводится все отправляемые запросы и ответы:
-```bash
-DEBUG=alice-tester mocha test.js
+## Проверка времени ответа
+Если время ответа на запрос превышает `User.config.responseTimeout`, то тест упадет с ошибкой:
 ```
-В консоли:
+Response time (1056 ms) exceeded timeout (1000 ms)
 ```
-alice-tester REQUEST: {"request":{"command":"","original_utterance":"","type":"SimpleUtterance"},"session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"meta":{"locale":"ru-RU","timezone":"Europe/Moscow","client_id":"ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)","interfaces":{"screen":{}}},"version":"1.0"} +0ms
-alice-tester RESPONSE: {"version":"1.0","session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"response":{"text":"Это приватный навык и недоступен для публичного использования.","tts":"Это приватный навык и недоступен для публичного использования.","end_session":true}} +15ms
-```
+Можно выставить любое другое значение порога, либо отключить проверку значением `0`.
 
 ## Проверка размеров ответа
 На многие поля ответа накладываются ограничения по длине. 
@@ -217,6 +215,18 @@ ALICE_TESTER_RECORD=responses.json mocha test.js
     "tts": "Это приватный навык и недоступен для публичного использования."
   }
 ]
+```
+
+## Отладка тестов
+Для отладки тестов можно использовать переменную окружения DEBUG (см [debug](https://github.com/visionmedia/debug)).
+Тогда в консоль будут выводится все отправляемые запросы и ответы:
+```bash
+DEBUG=alice-tester mocha test.js
+```
+В консоли:
+```
+alice-tester REQUEST: {"request":{"command":"","original_utterance":"","type":"SimpleUtterance"},"session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"meta":{"locale":"ru-RU","timezone":"Europe/Moscow","client_id":"ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)","interfaces":{"screen":{}}},"version":"1.0"} +0ms
+alice-tester RESPONSE: {"version":"1.0","session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"response":{"text":"Это приватный навык и недоступен для публичного использования.","tts":"Это приватный навык и недоступен для публичного использования.","end_session":true}} +15ms
 ```
 
 ## История версий

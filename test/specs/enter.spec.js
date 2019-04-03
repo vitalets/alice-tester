@@ -1,5 +1,5 @@
 
-const {createRequest, createResponse} = require('../protocol');
+const {createRequest, createEnterRequest, createResponse} = require('../protocol');
 
 describe('enter', () => {
   it('without message', async () => {
@@ -72,5 +72,17 @@ describe('enter', () => {
     scope.done();
     assert.deepEqual(user.body, resBody);
     assert.equal(user.response.text, 'Привет');
+  });
+
+  it('throws for timeout', async () => {
+    User.config.responseTimeout = 100;
+    nock('http://localhost')
+      .post('/', createEnterRequest())
+      .delay(150)
+      .reply(200, createResponse());
+
+    const user = new User('http://localhost');
+
+    await assert.rejects(user.enter(), /Response time \(\d+ ms\) exceeded timeout \(100 ms\)/);
   });
 });
