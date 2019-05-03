@@ -142,6 +142,18 @@ User.config.responseTimeout = 500;
   * **webhookUrl** `{String|http.Server}` - вебхук-урл навыка в виде строки или инстанса `http.Server`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к каждому запросу, либо функция модификации тела запроса.
 
+Примеры:
+```js
+// обычный пользователь
+const user = new User('http://localhost');
+
+// пользователь с заданным user_id
+const user = new User('http://localhost', {session: {user_id: 'custom-user-id'}});
+
+// пользователь без экрана
+const user = new User('http://localhost', body => delete body.meta.interfaces.screen);
+```
+
 ### user.enter([message], [extraProps])
 Вход пользователя в навык.  
 **Параметры:**
