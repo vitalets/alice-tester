@@ -147,6 +147,12 @@ class User {
   }
 
   _setWebhookUrl(webhookUrl) {
+    webhookUrl = webhookUrl || config.webhookUrl;
+
+    if (!webhookUrl) {
+      throw new Error(`You should provide webhookUrl`);
+    }
+
     if (typeof webhookUrl === 'string') {
       this._webhookUrl = webhookUrl;
     } else {

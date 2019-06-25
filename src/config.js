@@ -11,6 +11,12 @@ const defaults = {
    * @type {Number}
    */
   responseTimeout: 1000,
+
+  /**
+   * Default webhook url.
+   * @type {String}
+   */
+  webhookUrl: '',
 };
 
 module.exports = {...defaults};
