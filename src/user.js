@@ -12,6 +12,10 @@ const config = require('./config');
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
 class User {
+  static extractUserId(reqBody) {
+    return reqBody && reqBody.session && reqBody.session.user_id;
+  }
+
   /**
    * @param {String|http.Server} webhookUrl
    * @param {Object|Function} [extraProps]
@@ -19,7 +23,7 @@ class User {
   constructor(webhookUrl, extraProps = {}) {
     this._setWebhookUrl(webhookUrl);
     this._extraProps = extraProps;
-    this._setUserId();
+    this._id = User.extractUserId(extraProps) || config.generateUserId();
     this._sessionsCount = 0;
     this._messagesCount = 0;
     this._reqTimestamp = 0;
@@ -74,8 +78,9 @@ class User {
     this._resBody = null;
     this._messagesCount++;
     this._buildBaseReqBody(message);
-    this._mergeExtraProps(this._extraProps);
-    extraPropsList.forEach(extraProps => this._mergeExtraProps(extraProps));
+    [this._extraProps, ...extraPropsList].forEach(extraProps => this._mergeExtraProps(extraProps));
+    // sometimes userId is defined via function in extraProps and available only after the request body formed.
+    this._updateUserIdIfNeeded();
     return this._post();
   }
 
@@ -151,10 +156,11 @@ class User {
     }
   }
 
-  _setUserId() {
-    this._id = (this._extraProps && this._extraProps.session && this._extraProps.session.user_id)
-      ? this._extraProps.session.user_id
-      : config.generateUserId();
+  _updateUserIdIfNeeded() {
+    const sentUserId = User.extractUserId(this._reqBody);
+    if (sentUserId !== this._id) {
+      this._id = sentUserId;
+    }
   }
 
   _assertResponseTime() {

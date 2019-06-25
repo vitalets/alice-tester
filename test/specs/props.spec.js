@@ -30,8 +30,18 @@ describe('props', () => {
     assert.notEqual(user.sessionId, sessionId);
   });
 
-  it('should return userId from extraProps', async () => {
+  it('should use userId from extraProps if defined as object', async () => {
     const user = new User('http://localhost', {session: {user_id: 'foo'}});
+    assert.equal(user.id, 'foo');
+  });
+
+  it('should update userId from extraProps after first request if defined as function', async () => {
+    nock('http://localhost')
+      .post('/', createEnterRequest({session: {user_id: 'foo'}}))
+      .reply(200, createResponse());
+
+    const user = new User('http://localhost', body => body.session.user_id = 'foo');
+    await user.enter();
     assert.equal(user.id, 'foo');
   });
 });
