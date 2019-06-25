@@ -236,7 +236,7 @@ ALICE_TESTER_RECORD=responses.json mocha test.js
 ```
 
 ## Отладка тестов
-Для отладки тестов можно использовать переменную окружения DEBUG (см [debug](https://github.com/visionmedia/debug)).
+Для отладки тестов можно выставить переменную окружения `DEBUG=alice-tester` (см [debug](https://github.com/visionmedia/debug)).
 Тогда в консоль будут выводится все отправляемые запросы и ответы:
 ```bash
 DEBUG=alice-tester mocha test.js
