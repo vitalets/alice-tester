@@ -1,6 +1,6 @@
 {
   "name": "alice-tester",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A module for testing Yandex Alice skills",
   "author": {
     "name": "Vitaliy Potapov",
