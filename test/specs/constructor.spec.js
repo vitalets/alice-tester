@@ -17,6 +17,7 @@ describe('constructor', () => {
     await user.enter();
 
     scope.done();
+    assert.equal(user.webhookUrl, 'http://localhost');
     assert.equal(user.response.text, 'Привет');
   });
 
@@ -34,6 +35,7 @@ describe('constructor', () => {
     await user.enter();
 
     scope.done();
+    assert.equal(user.webhookUrl, 'http://localhost');
     assert.equal(user.response.text, 'Привет');
   });
 
@@ -61,6 +63,7 @@ describe('constructor', () => {
       const user = new User(server);
       await user.enter();
 
+      assert.equal(user.webhookUrl, `http://localhost:${port}`);
       assert.equal(user.response.text, 'Привет');
     });
   });

@@ -48,6 +48,10 @@ class User {
     return this._resBody;
   }
 
+  get webhookUrl() {
+    return this._webhookUrl;
+  }
+
   async enter(message = '', extraProps = {}) {
     this._sessionsCount++;
     this._messagesCount = 0;
