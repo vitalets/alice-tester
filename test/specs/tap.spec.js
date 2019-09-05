@@ -137,5 +137,30 @@ describe('tap', () => {
       /Кнопка "Ок" не найдена среди возможных кнопок: Да, Нет./
     );
   });
+
+  it('navigate to url if button contains url', async () => {
+    const reqBody = createEnterRequest();
+    const resBody = createResponse({
+      response: {buttons: [
+          {
+            title: 'кнопка',
+            url: 'http://localhost'
+          },
+        ]}
+    });
+
+    const scope = nock('http://localhost')
+      .post('/', reqBody)
+      .reply(200, resBody)
+      .get('/')
+      .reply(200, 'ok');
+
+    const user = new User('http://localhost');
+    await user.enter();
+    await user.tap('кнопка');
+
+    scope.done();
+    assert.equal(user.body, 'ok');
+  });
 });
 

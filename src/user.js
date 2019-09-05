@@ -70,8 +70,12 @@ class User {
       throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
     }
 
-    const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
-    return this._sendMessage(button.title, buttonExtraProps, extraProps);
+    if (button.url) {
+      return this._navigate(button.url);
+    } else {
+      const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
+      return this._sendMessage(button.title, buttonExtraProps, extraProps);
+    }
   }
 
   async _sendMessage(message, ...extraPropsList) {
@@ -174,6 +178,13 @@ class User {
     if (config.responseTimeout && responseTime > config.responseTimeout) {
       throw new Error(`Response time (${responseTime} ms) exceeded timeout (${config.responseTimeout} ms)`);
     }
+  }
+
+  async _navigate(url) {
+    this._resBody = null;
+    const response = await fetch(url);
+    this._resBody = await response.text();
+    return this._resBody;
   }
 }
 
