@@ -2,7 +2,7 @@
 const {createRequest, createEnterRequest, createResponse} = require('../protocol');
 
 describe('tap', () => {
-  it('existing button without payload', async () => {
+  it('tap by title (button without payload)', async () => {
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
@@ -12,7 +12,7 @@ describe('tap', () => {
 
     const reqBody2 = createRequest({
       session: {new: false, message_id: 2},
-      request: {command: 'Да', original_utterance: 'Да', type: 'ButtonPressed'}
+      request: {command: 'Да', original_utterance: 'Да', type: 'SimpleUtterance'}
     });
     const resBody2 = createResponse();
 
@@ -30,12 +30,12 @@ describe('tap', () => {
     assert.deepEqual(user.response, response);
   });
 
-  it('existing button with payload', async () => {
+  it('tap by title (button with payload)', async () => {
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
-          {title: 'Да', payload: {foo: 1}}
-        ]}
+        {title: 'Да', payload: {foo: 1}}
+      ]}
     });
 
     const reqBody2 = createRequest({
@@ -57,6 +57,33 @@ describe('tap', () => {
     scope.done();
   });
 
+  it('tap by regexp', async () => {
+    const reqBody1 = createEnterRequest();
+    const resBody1 = createResponse({
+      response: {buttons: [
+          {title: 'Да'}
+        ]}
+    });
+
+    const reqBody2 = createRequest({
+      session: {new: false, message_id: 2},
+      request: {command: 'Да', original_utterance: 'Да', type: 'SimpleUtterance'}
+    });
+    const resBody2 = createResponse();
+
+    const scope = nock('http://localhost')
+      .post('/', reqBody1)
+      .reply(200, resBody1)
+      .post('/', reqBody2)
+      .reply(200, resBody2);
+
+    const user = new User('http://localhost');
+    await user.enter();
+    await user.tap(/д/i);
+
+    scope.done();
+  });
+
   it('button with extraProps', async () => {
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
@@ -67,7 +94,7 @@ describe('tap', () => {
 
     const reqBody2 = createRequest({
       session: {new: false, message_id: 2},
-      request: {command: 'Да', original_utterance: 'Да', type: 'ButtonPressed', markup: {dangerous_context: true}}
+      request: {command: 'Да', original_utterance: 'Да', type: 'SimpleUtterance', markup: {dangerous_context: true}}
     });
     const resBody2 = createResponse();
 
@@ -94,7 +121,7 @@ describe('tap', () => {
 
     const reqBody2 = createRequest({
       session: {new: false, message_id: 2},
-      request: {command: 'Да', original_utterance: 'Да', type: 'ButtonPressed', markup: {dangerous_context: true}}
+      request: {command: 'Да', original_utterance: 'Да', type: 'SimpleUtterance', markup: {dangerous_context: true}}
     });
     const resBody2 = createResponse();
 
@@ -121,7 +148,7 @@ describe('tap', () => {
     await assert.rejects(user.tap('Да'), /Предыдущий запрос не вернул ни одной кнопки/);
   });
 
-  it('throws for not matched buttons', async () => {
+  it('throw if non matched by title', async () => {
     const reqBody1 = createEnterRequest();
     const resBody1 = createResponse({
       response: {buttons: [
@@ -135,6 +162,23 @@ describe('tap', () => {
     await user.enter();
     await assert.rejects(user.tap('Ок'),
       /Кнопка "Ок" не найдена среди возможных кнопок: Да, Нет./
+    );
+  });
+
+  it('throws if non matched by regexp', async () => {
+    const reqBody1 = createEnterRequest();
+    const resBody1 = createResponse({
+      response: {buttons: [
+          {title: 'Да'},
+          {title: 'Нет'},
+        ]}
+    });
+
+    nock('http://localhost').post('/', reqBody1).reply(200, resBody1);
+    const user = new User('http://localhost');
+    await user.enter();
+    await assert.rejects(user.tap(/помощь/i),
+      /Кнопка "\/помощь\/i" не найдена среди возможных кнопок: Да, Нет./
     );
   });
 

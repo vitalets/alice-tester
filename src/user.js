@@ -63,21 +63,23 @@ class User {
     return this._sendMessage(message, extraProps);
   }
 
+  /**
+   * Tap on button.
+   *
+   * @param {String|RegExp} title
+   * @param {Object} [extraProps]
+   * @returns {Promise}
+   */
   async tap(title, extraProps = {}) {
-    if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
-      throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
-    }
-
-    const button = this.response.buttons.find(b => b.title === title);
-    if (!button) {
-      const possibleTitles = this.response.buttons.map(b => b.title).join(', ');
-      throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
-    }
-
+    this._assertButtonsInPrevResponse();
+    const button = this._findButton(title);
     if (button.url) {
       return this._navigate(button.url);
     } else {
-      const buttonExtraProps = {request: {type: 'ButtonPressed', payload: button.payload}};
+      const buttonExtraProps = button.payload
+        ? {request: {type: 'ButtonPressed', payload: button.payload}}
+        : {request: {type: 'SimpleUtterance'}};
+
       return this._sendMessage(button.title, buttonExtraProps, extraProps);
     }
   }
@@ -125,6 +127,20 @@ class User {
     } else {
       merge(this._reqBody, extraProps);
     }
+  }
+
+  _findButton(title) {
+    const isMatchedButton = typeof title === 'string'
+      ? button => button.title === title
+      : button => title.test(button.title);
+
+    const button = this.response.buttons.find(isMatchedButton);
+    if (!button) {
+      const possibleTitles = this.response.buttons.map(b => b.title).join(', ');
+      throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
+    }
+
+    return button;
   }
 
   async _post() {
@@ -189,6 +205,12 @@ class User {
     const response = await fetch(url);
     this._resBody = await response.text();
     return this._resBody;
+  }
+
+  _assertButtonsInPrevResponse() {
+    if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
+      throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
+    }
   }
 }
 
