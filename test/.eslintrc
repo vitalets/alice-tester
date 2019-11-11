@@ -5,8 +5,7 @@
 
   "globals": {
     "assert": false,
-    "nock": false,
-    "sinon": false,
+    "server": false,
     "User": false
   },
 
