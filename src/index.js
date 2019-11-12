@@ -8,6 +8,7 @@ const debug = require('debug')('alice-tester');
 const constraints = require('./constraints');
 const config = require('./config');
 const requestTemplate = require('./request.template');
+const getEntities = require('./entities');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
@@ -97,12 +98,14 @@ class User {
   _buildBaseReqBody(message) {
     const command = normalizeCommand(message);
     const tokens = command ? command.split(/\s+/) : [];
+    const entities = getEntities(tokens);
     this._reqBody = merge({}, requestTemplate, {
       request: {
         command,
         original_utterance: message,
         nlu: {
-          tokens
+          tokens,
+          entities,
         }
       },
       session: {
