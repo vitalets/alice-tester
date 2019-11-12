@@ -7,6 +7,7 @@ const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
 const constraints = require('./constraints');
 const config = require('./config');
+const requestTemplate = require('./request.template');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
@@ -94,30 +95,18 @@ class User {
   }
 
   _buildBaseReqBody(message) {
-    this._reqBody = {
+    this._reqBody = merge({}, requestTemplate, {
       request: {
         command: message,
         original_utterance: message,
-        type: 'SimpleUtterance',
-        nlu: {},
       },
       session: {
         new: this._messagesCount === 1,
         user_id: this.id,
         session_id: this.sessionId,
         message_id: this._messagesCount,
-        skill_id: 'test-skill',
-      },
-      meta: {
-        locale: 'ru-RU',
-        timezone: 'Europe/Moscow',
-        client_id: 'ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)',
-        interfaces: {
-          screen: {}
-        }
-      },
-      version: '1.0'
-    };
+      }
+    });
   }
 
   _mergeExtraProps(extraProps) {
