@@ -2,15 +2,22 @@ describe('say', () => {
   it('should send request by protocol', async () => {
     const user = new User();
     await user.enter();
-    await user.say('куку');
+    await user.say('Привет! Как дела?');
 
     assert.deepEqual(server.requests[1], {
       request:
         {
-          command: 'куку',
-          original_utterance: 'куку',
+          command: 'привет как дела',
+          original_utterance: 'Привет! Как дела?',
           type: 'SimpleUtterance',
-          nlu: {}
+          nlu: {
+            tokens: [
+              'привет',
+              'как',
+              'дела',
+            ],
+            entities: [],
+          }
         },
       session:
         {
@@ -38,7 +45,10 @@ describe('say', () => {
     await user.say('куку');
 
     assert.deepEqual(user.body, {
-      response: {text: 'хай', tts: 'даров'},
+      response: {
+        text: 'хай',
+        tts: 'даров'
+      },
       session:
         {
           new: false,
@@ -56,19 +66,35 @@ describe('say', () => {
     assert.deepEqual(user.response, response);
   });
 
+  it('should normalize command', async () => {
+    const user = new User();
+    await user.enter();
+
+    await user.say('  сообщение   с пробелами  \n');
+    assert.equal(server.requests[1].request.command, 'сообщение с пробелами');
+
+    await user.say('цифры 1 23 и математические знаки + - * /');
+    assert.equal(server.requests[2].request.command, 'цифры 1 23 и математические знаки + - * /');
+  });
+
   it('in-call extraProps', async () => {
     const user = new User();
     await user.enter();
-    await user.say('2 + 2 равно 4', {
+    await user.say('куку', {
       request: {
-        original_utterance: 'два плюс два равно четыре'
+        markup: {
+          dangerous_context: true
+        }
       }
     });
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: '2 + 2 равно 4',
-        original_utterance: 'два плюс два равно четыре',
+        command: 'куку',
+        original_utterance: 'куку',
+        markup: {
+          dangerous_context: true
+        }
       }
     });
   });
@@ -80,7 +106,7 @@ describe('say', () => {
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: 'Что ты умеешь?',
+        command: 'что ты умеешь',
         original_utterance: 'Что ты умеешь?',
       },
       session: {
@@ -92,16 +118,21 @@ describe('say', () => {
   it('global and in-call extraProps', async () => {
     const user = new User(server, {session: {user_id: 'custom-user'}});
     await user.enter();
-    await user.say('2 + 2 равно 4', {
+    await user.say('куку', {
       request: {
-        original_utterance: 'два плюс два равно четыре'
+        markup: {
+          dangerous_context: true
+        }
       }
     });
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: '2 + 2 равно 4',
-        original_utterance: 'два плюс два равно четыре',
+        command: 'куку',
+        original_utterance: 'куку',
+        markup: {
+          dangerous_context: true
+        }
       },
       session: {
         user_id: 'custom-user'
@@ -112,12 +143,15 @@ describe('say', () => {
   it('extraProps as a function', async () => {
     const user = new User(server, body => body.session.user_id = 'custom-user');
     await user.enter();
-    await user.say('2 + 2 равно 4', body => body.request.original_utterance = 'два плюс два равно четыре');
+    await user.say('куку', body => body.request.markup = {dangerous_context: true});
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: '2 + 2 равно 4',
-        original_utterance: 'два плюс два равно четыре',
+        command: 'куку',
+        original_utterance: 'куку',
+        markup: {
+          dangerous_context: true
+        }
       }
     });
   });
@@ -141,4 +175,3 @@ describe('say', () => {
     await assert.rejects(user.say('Что ты умеешь?'), /Response time \(\d+ ms\) exceeded timeout \(100 ms\)/);
   });
 });
-

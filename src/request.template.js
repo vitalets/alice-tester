@@ -3,7 +3,10 @@ module.exports = {
     command: '{command}',
     original_utterance: '{original_utterance}',
     type: 'SimpleUtterance',
-    nlu: {},
+    nlu: {
+      tokens: [],
+      entities: [],
+    },
   },
   session: {
     new: '{session.new}',

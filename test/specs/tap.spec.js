@@ -1,19 +1,25 @@
 describe('tap', () => {
 
   it('should send request by protocol (button without payload)', async () => {
-    const buttons = [{title: 'Да'}];
+    const buttons = [{title: 'Да, начинаем!'}];
     server.setResponse({buttons});
     const user = new User();
     await user.enter();
-    await user.tap('Да');
+    await user.tap('Да, начинаем!');
 
     assert.deepEqual(server.requests[1], {
       request:
         {
-          command: 'Да',
-          original_utterance: 'Да',
+          command: 'да начинаем',
+          original_utterance: 'Да, начинаем!',
           type: 'SimpleUtterance',
-          nlu: {}
+          nlu: {
+            tokens: [
+              'да',
+              'начинаем'
+            ],
+            entities: [],
+          }
         },
       session:
         {
@@ -76,7 +82,7 @@ describe('tap', () => {
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: 'Да',
+        command: 'да',
         original_utterance: 'Да',
         type: 'ButtonPressed',
         payload: {foo: 1}
@@ -95,7 +101,7 @@ describe('tap', () => {
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: 'Да',
+        command: 'да',
         original_utterance: 'Да',
         type: 'ButtonPressed',
         payload: {foo: 1}
@@ -112,7 +118,7 @@ describe('tap', () => {
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: 'Да',
+        command: 'да',
         original_utterance: 'Да',
         type: 'SimpleUtterance',
         markup: {dangerous_context: true}
@@ -129,7 +135,7 @@ describe('tap', () => {
 
     assert.containSubset(server.requests[1], {
       request: {
-        command: 'Да',
+        command: 'да',
         original_utterance: 'Да',
         type: 'SimpleUtterance',
         markup: {dangerous_context: true}

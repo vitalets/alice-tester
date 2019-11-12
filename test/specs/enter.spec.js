@@ -1,5 +1,5 @@
 describe('enter', () => {
-  it('should send request by protocol', async () => {
+  it('enter without message: request by protocol', async () => {
     const user = new User();
     await user.enter();
 
@@ -9,7 +9,10 @@ describe('enter', () => {
           command: '',
           original_utterance: 'запусти навык тест',
           type: 'SimpleUtterance',
-          nlu: {}
+          nlu: {
+            tokens: [],
+            entities: [],
+          }
         },
       session:
         {
@@ -30,12 +33,34 @@ describe('enter', () => {
     });
   });
 
+  it('enter with message: request by protocol', async () => {
+    const user = new User();
+    await user.enter('Сколько времени?');
+    assert.containSubset(server.requests[0], {
+      request: {
+        command: 'сколько времени',
+        original_utterance: 'запусти навык тест Сколько времени?',
+        type: 'SimpleUtterance',
+        nlu: {
+          tokens: [
+            'сколько',
+            'времени'
+          ],
+          entities: [],
+        }
+      },
+    });
+  });
+
   it('should save response to user props', async () => {
     const user = new User();
     const response = await user.enter();
 
     assert.deepEqual(user.body, {
-      response: {text: 'привет', tts: 'привет'},
+      response: {
+        text: 'привет',
+        tts: 'привет'
+      },
       session:
         {
           new: true,
@@ -51,17 +76,6 @@ describe('enter', () => {
       tts: 'привет'
     });
     assert.deepEqual(user.response, response);
-  });
-
-  it('enter with message', async () => {
-    const user = new User();
-    await user.enter('куку');
-    assert.containSubset(server.requests[0], {
-      request: {
-        command: 'куку',
-        original_utterance: 'запусти навык тест куку',
-      },
-    });
   });
 
   it('global extraProps', async () => {

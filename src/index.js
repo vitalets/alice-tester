@@ -95,10 +95,15 @@ class User {
   }
 
   _buildBaseReqBody(message) {
+    const command = normalizeCommand(message);
+    const tokens = command ? command.split(/\s+/) : [];
     this._reqBody = merge({}, requestTemplate, {
       request: {
-        command: message,
+        command,
         original_utterance: message,
+        nlu: {
+          tokens
+        }
       },
       session: {
         new: this._messagesCount === 1,
@@ -200,6 +205,18 @@ class User {
     }
   }
 }
+
+const normalizeCommand = message => {
+  return message
+  // приводим к нижнему регистру
+    .toLowerCase()
+    // удаляем знаки препинания
+    .replace(/[,.!?]/g, '')
+    // удаляем повторяющиеся пробелы
+    .replace(/\s+/g, ' ')
+    // отрезаем пробелы в начале и конце
+    .trim();
+};
 
 User.config = config;
 
