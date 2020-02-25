@@ -5,9 +5,9 @@
 const fetch = require('node-fetch');
 const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
+const { throwIf, throwError } = require('throw-utils');
 const constraints = require('./constraints');
 const config = require('./config');
-const requestTemplate = require('./request.template');
 const getEntities = require('./entities');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
@@ -19,10 +19,10 @@ class User {
 
   /**
    * @param {String|http.Server} [webhookUrl]
-   * @param {Object|Function} [extraProps]
+   * @param {Object|Function} [extraProps] extraProps applied to every request
    */
-  constructor(webhookUrl, extraProps = {}) {
-    this._setWebhookUrl(webhookUrl);
+  constructor(webhookUrl = '', extraProps = {}) {
+    this._setWebhookUrl(webhookUrl || config.webhookUrl);
     this._extraProps = extraProps;
     this._id = User.extractUserId(extraProps) || config.generateUserId();
     this._sessionsCount = 0;
@@ -53,15 +53,24 @@ class User {
     return this._webhookUrl;
   }
 
+  /**
+   * Вход пользователя в навык - Новая сессия.
+   *
+   * @param {string} [message='']
+   * @param {function|object} extraProps
+   * @returns {Promise}
+   */
   async enter(message = '', extraProps = {}) {
     this._sessionsCount++;
     this._messagesCount = 0;
-    const original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
-    return this._sendMessage(message, {request: {original_utterance}}, extraProps);
+    const request = this._buildSimpleUtteranceRequest(message);
+    request.original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
+    return this._sendRequest(request, extraProps);
   }
 
   async say(message, extraProps = {}) {
-    return this._sendMessage(message, extraProps);
+    const request = this._buildSimpleUtteranceRequest(message);
+    return this._sendRequest(request, extraProps);
   }
 
   /**
@@ -72,51 +81,128 @@ class User {
    * @returns {Promise}
    */
   async tap(title, extraProps = {}) {
-    this._assertButtonsInPrevResponse();
-    const button = this._findButton(title);
-    if (button.url) {
-      return this._navigate(button.url);
-    } else {
-      const buttonExtraProps = button.payload
-        ? {request: {type: 'ButtonPressed', payload: button.payload}}
-        : {request: {type: 'SimpleUtterance'}};
+    const buttons = this.response.buttons;
+    throwIf(!Array.isArray(buttons) || !buttons.length, `Предыдущий запрос не вернул ни одной кнопки.`);
+    const button = this._findButton(buttons, title);
+    return this._sendTapRequest(button, extraProps);
+  }
 
-      return this._sendMessage(button.title, buttonExtraProps, extraProps);
+  /**
+   * Tap on BigImage or image in ItemsList.
+   *
+   * @param {String|RegExp} [title]
+   * @param {Object} [extraProps]
+   * @returns {Promise}
+   */
+  async tapImage(title, extraProps = {}) {
+    throwIf(!this.response.card, `Предыдущий запрос не вернул поле card.`);
+    const isBigImage = this.response.card.type === 'BigImage';
+    const items = isBigImage ? [this.response.card] : this.response.card.items;
+    throwIf(!Array.isArray(items) || !items.length, `Предыдущий запрос не вернул изображений.`);
+    const itemsWithButton = items.filter(item => item.button);
+    throwIf(!itemsWithButton.length, `Предыдущий запрос не вернул изображений с кнопками.`);
+    // Кнопки в изображениях имеют свойство text, а не title. Но если text не задан, то используется title изображения.
+    // Поэтому тут для удобства приводим кнопки-изображения к формату обычных кнопок, задавая им title.
+    const buttons = itemsWithButton.map(item => ({
+      title: item.button.text || item.title,
+      url: item.button.url,
+      payload: item.button.payload,
+    }));
+    const button = isBigImage ? buttons[0] : this._findButton(buttons, title);
+    return this._sendTapRequest(button, extraProps);
+  }
+
+  async _sendTapRequest({ title, payload, url }, extraProps) {
+    // если у копки есть и url и payload, то в ПП ios происходит и переход на урл, и отправка payload в навык
+    // Но на андроиде другое поведение: payload в навык не отправляется. Поэтому оставляем только переход по урлу
+    if (url) {
+      return this._navigate(url);
+    } else {
+      const request = payload
+        ? this._buildButtonPressedRequest(payload)
+        : this._buildSimpleUtteranceRequest(title);
+      return this._sendRequest(request, extraProps);
     }
   }
 
-  async _sendMessage(message, ...extraPropsList) {
+  async _sendRequest(request, extraProps) {
     this._resBody = null;
     this._messagesCount++;
-    this._buildBaseReqBody(message);
-    [this._extraProps, ...extraPropsList].forEach(extraProps => this._mergeExtraProps(extraProps));
-    // sometimes userId is defined via function in extraProps and available only after the request body formed.
-    this._updateUserIdIfNeeded();
+    this._buildReqBody(request, extraProps);
     return this._post();
   }
 
-  _buildBaseReqBody(message) {
-    const command = normalizeCommand(message);
-    const tokens = command ? command.split(/\s+/) : [];
-    const entities = getEntities(tokens);
-    this._reqBody = merge({}, requestTemplate, {
-      request: {
-        command,
-        original_utterance: message,
-        nlu: {
-          tokens,
-          entities,
-        }
-      },
-      session: {
-        new: this._messagesCount === 1,
-        user_id: this.id,
-        session_id: this.sessionId,
-        message_id: this._messagesCount,
-      }
-    });
+  _buildReqBody(request, extraProps) {
+    this._reqBody = {
+      request,
+      session: this._buildSessionObject(),
+      meta: this._buildMetaObject(),
+      version: '1.0',
+    };
+    this._mergeExtraProps(this._extraProps);
+    this._mergeExtraProps(extraProps);
+    // sometimes userId is defined via function in extraProps and available only after the request body formed.
+    this._updateUserIdIfNeeded();
   }
 
+  _buildSimpleUtteranceRequest(userMessage) {
+    const command = normalizeCommand(userMessage);
+    const tokens = command ? command.split(/\s+/) : [];
+    const entities = getEntities(tokens);
+    return {
+      command,
+      original_utterance: userMessage,
+      type: 'SimpleUtterance',
+      nlu: {
+        tokens,
+        entities,
+      },
+      markup: {
+        dangerous_context: false
+      },
+    };
+  }
+
+  _buildButtonPressedRequest(payload) {
+    // при нажатии на кнопку с payload в запросе не приходят command, original_utterance, markup
+    return {
+      payload,
+      type: 'ButtonPressed',
+      nlu: {
+        tokens: [],
+        entities: [],
+      },
+    };
+  }
+
+  _buildSessionObject() {
+    return {
+      new: this._messagesCount === 1,
+      user_id: this.id,
+      session_id: this.sessionId,
+      message_id: this._messagesCount,
+      skill_id: 'test-skill',
+    };
+  }
+
+  _buildMetaObject() {
+    return {
+      locale: 'ru-RU',
+      timezone: 'Europe/Moscow',
+      client_id: 'ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)',
+      interfaces: {
+        screen: {}
+      }
+    };
+  }
+
+  /**
+   * Если extraProps функция, то она мутирует запрос внутри.
+   * Если extraProps объект, то домердживаем их в запрос.
+   *
+   * @param {function|object} extraProps
+   * @private
+   */
   _mergeExtraProps(extraProps) {
     if (typeof extraProps === 'function') {
       extraProps(this._reqBody);
@@ -125,19 +211,17 @@ class User {
     }
   }
 
-  _findButton(title) {
-    const isMatchedButton = typeof title === 'string'
+  _findButton(buttons, title) {
+    throwIf(!title, `Необходимо задать title кнопки для нажатия.`);
+    const matchButton = typeof title === 'string'
       ? button => button.title === title
       : button => title.test(button.title);
-
-    const button = this.response.buttons.find(isMatchedButton);
-    if (!button) {
-      const possibleTitles = this.response.buttons.map(b => b.title).join(', ');
-      throw new Error(`Кнопка "${title}" не найдена среди возможных кнопок: ${possibleTitles}.`);
-    }
-
-    return button;
+    const button = buttons.find(matchButton);
+    return button || throwError(
+      `Кнопка "${title}" не найдена среди возможных кнопок: ${buttons.map(b => b.title).join(', ')}.`
+    );
   }
+
 
   async _post() {
     const headers = {
@@ -147,7 +231,7 @@ class User {
     const body = JSON.stringify(this._reqBody);
     debug(`REQUEST: ${body}`);
     this._reqTimestamp = Date.now();
-    const response = await fetch(this._webhookUrl, {method: 'post', headers, body});
+    const response = await fetch(this._webhookUrl, { method: 'post', headers, body });
     return response.ok ? this._handleSuccess(response) : this._handleError(response);
   }
 
@@ -166,8 +250,6 @@ class User {
   }
 
   _setWebhookUrl(webhookUrl) {
-    webhookUrl = webhookUrl || config.webhookUrl;
-
     if (!webhookUrl) {
       throw new Error(`You should provide webhookUrl`);
     }
@@ -182,9 +264,9 @@ class User {
   }
 
   _updateUserIdIfNeeded() {
-    const sentUserId = User.extractUserId(this._reqBody);
-    if (sentUserId !== this._id) {
-      this._id = sentUserId;
+    const userIdInReqBody = User.extractUserId(this._reqBody);
+    if (userIdInReqBody !== this._id) {
+      this._id = userIdInReqBody;
     }
   }
 
@@ -200,12 +282,6 @@ class User {
     const response = await fetch(url);
     this._resBody = await response.text();
     return this._resBody;
-  }
-
-  _assertButtonsInPrevResponse() {
-    if (!this.response || !Array.isArray(this.response.buttons) || this.response.buttons.length === 0) {
-      throw new Error(`Предыдущий запрос не вернул ни одной кнопки.`);
-    }
   }
 }
 

@@ -17,7 +17,10 @@ describe('say', () => {
               'дела',
             ],
             entities: [],
-          }
+          },
+          markup: {
+            dangerous_context: false
+          },
         },
       session:
         {

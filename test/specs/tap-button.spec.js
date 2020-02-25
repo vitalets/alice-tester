@@ -1,8 +1,11 @@
-describe('tap', () => {
+describe('tap (button)', () => {
 
-  it('should send request by protocol (button without payload)', async () => {
-    const buttons = [{title: 'Да, начинаем!'}];
-    server.setResponse({buttons});
+  it('button without payload: send command and original_utterance', async () => {
+    server.setResponse({
+      buttons: [
+        { title: 'Да, начинаем!' }
+      ]
+    });
     const user = new User();
     await user.enter();
     await user.tap('Да, начинаем!');
@@ -19,7 +22,10 @@ describe('tap', () => {
               'начинаем'
             ],
             entities: [],
-          }
+          },
+          markup: {
+            dangerous_context: false
+          },
         },
       session:
         {
@@ -40,9 +46,32 @@ describe('tap', () => {
     });
   });
 
-  it('should set user props', async () => {
-    const buttons = [{title: 'Да'}];
-    server.setResponse({buttons});
+  it('button with payload: send payload, no command, no original_utterance', async () => {
+    server.setResponse({
+      buttons: [
+        { title: 'Да', payload: {foo: 1} }
+      ]
+    });
+    const user = new User();
+    await user.enter();
+    await user.tap('Да');
+
+    assert.deepEqual(server.requests[1].request, {
+      type: 'ButtonPressed',
+      payload: {foo: 1},
+      nlu: {
+        tokens: [],
+        entities: [],
+      }
+    });
+  });
+
+  it('should set user props from response', async () => {
+    server.setResponse({
+      buttons: [
+        { title: 'Да' }
+      ]
+    });
     const user = new User();
     await user.enter();
     const response = await user.tap('Да');
@@ -71,74 +100,43 @@ describe('tap', () => {
     assert.deepEqual(user.response, response);
   });
 
-  it('tap by title (button with payload)', async () => {
-    const buttons = [
-      {title: 'Да', payload: {foo: 1}}
-    ];
-    server.setResponse({buttons});
-    const user = new User();
-    await user.enter();
-    await user.tap('Да');
-
-    assert.containSubset(server.requests[1], {
-      request: {
-        command: 'да',
-        original_utterance: 'Да',
-        type: 'ButtonPressed',
-        payload: {foo: 1}
-      }
-    });
-  });
-
   it('tap by regexp', async () => {
-    const buttons = [
-      {title: 'Да', payload: {foo: 1}}
-    ];
-    server.setResponse({buttons});
+    server.setResponse({
+      buttons: [
+        {title: 'Да', payload: {foo: 1}}
+      ]
+    });
     const user = new User();
     await user.enter();
     await user.tap(/д/i);
 
-    assert.containSubset(server.requests[1], {
-      request: {
-        command: 'да',
-        original_utterance: 'Да',
-        type: 'ButtonPressed',
-        payload: {foo: 1}
+    assert.deepEqual(server.requests[1].request, {
+      type: 'ButtonPressed',
+      payload: {foo: 1},
+      nlu: {
+        tokens: [],
+        entities: [],
       }
     });
   });
 
-  it('tab with extraProps', async () => {
-    const buttons = [{title: 'Да'}];
-    server.setResponse({buttons});
+  it('tap with extraProps', async () => {
+    server.setResponse({
+      buttons: [
+        { title: 'Да' }
+      ]
+    });
     const user = new User();
     await user.enter();
     await user.tap('Да', {request: {markup: {dangerous_context: true}}});
 
-    assert.containSubset(server.requests[1], {
-      request: {
-        command: 'да',
-        original_utterance: 'Да',
-        type: 'SimpleUtterance',
-        markup: {dangerous_context: true}
-      }
-    });
-  });
-
-  it('tap with extraProps as a function', async () => {
-    const buttons = [{title: 'Да'}];
-    server.setResponse({buttons});
-    const user = new User();
-    await user.enter();
-    await user.tap('Да', body => body.request.markup = {dangerous_context: true});
-
-    assert.containSubset(server.requests[1], {
-      request: {
-        command: 'да',
-        original_utterance: 'Да',
-        type: 'SimpleUtterance',
-        markup: {dangerous_context: true}
+    assert.deepEqual(server.requests[1].request, {
+      command: 'да',
+      original_utterance: 'Да',
+      type: 'SimpleUtterance',
+      nlu: { tokens: [ 'да' ], entities: [] },
+      markup: {
+        dangerous_context: true
       }
     });
   });
@@ -150,12 +148,12 @@ describe('tap', () => {
   });
 
   it('throws if non matched by title', async () => {
-    const buttons = [
-      {title: 'Да'},
-      {title: 'Нет'},
-    ];
-    server.setResponse({buttons});
-
+    server.setResponse({
+      buttons: [
+        {title: 'Да'},
+        {title: 'Нет'},
+      ]
+    });
     const user = new User();
     await user.enter();
     await assert.rejects(user.tap('Ок'),
@@ -164,11 +162,12 @@ describe('tap', () => {
   });
 
   it('throws if non matched by regexp', async () => {
-    const buttons = [
-      {title: 'Да'},
-      {title: 'Нет'},
-    ];
-    server.setResponse({buttons});
+    server.setResponse({
+      buttons: [
+        {title: 'Да'},
+        {title: 'Нет'},
+      ]
+    });
 
     const user = new User();
     await user.enter();
@@ -178,11 +177,12 @@ describe('tap', () => {
   });
 
   it('navigate to url if button contains url', async () => {
-    const buttons = [{
-      title: 'кнопка',
-      url: `${server.getUrl()}/foo`
-    }];
-    server.setResponse({buttons});
+    server.setResponse({
+      buttons: [{
+        title: 'кнопка',
+        url: `${server.getUrl()}/foo`
+      }]
+    });
     const user = new User();
     await user.enter();
     server.setHandlerReqInfo();

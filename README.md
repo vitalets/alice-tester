@@ -21,6 +21,7 @@
   * [user.enter([message], [extraProps])](#userentermessage-extraprops)
   * [user.say(message, [extraProps])](#usersaymessage-extraprops)
   * [user.tap(title, [extraProps])](#usertaptitle-extraprops)
+  * [user.tapImage(title, [extraProps])](#usertapimagetitle-extraprops)
   * [user.response](#userresponse)
   * [user.body](#userbody)
   * [user.id](#userid)
@@ -182,6 +183,16 @@ const user = new User();
 Если предыдущий запрос вернул кнопки с дополнительными данными (payload), то эти данные будут прикреплены к запросу.   
 **Параметры:**
   * **title** `{String|RegExp}` - текст кнопки.
+  * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
+
+**Returns**: `Promise<response>`
+
+### user.tapImage(title, [extraProps])
+Нажатие пользователем на изображение с заданным текстом.
+Если предыдущий запрос не вернул изображений-кнопок, то будет ошибка.
+Если предыдущий запрос вернул изображения-кнопки с дополнительными данными (payload), то эти данные будут прикреплены к запросу.   
+**Параметры:**
+  * **title** `{String|RegExp}` - текст изображения-кнопки.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к телу запросу, либо функция модификации тела запроса.
 
 **Returns**: `Promise<response>`

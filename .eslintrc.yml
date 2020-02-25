@@ -29,7 +29,7 @@ rules:
       ignoreUrls: true
   max-lines:
     - error
-    - max: 180
+    - max: 250
       skipComments: true
       skipBlankLines: true
   semi:

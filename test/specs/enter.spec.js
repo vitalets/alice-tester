@@ -12,7 +12,10 @@ describe('enter', () => {
           nlu: {
             tokens: [],
             entities: [],
-          }
+          },
+          markup: {
+            dangerous_context: false
+          },
         },
       session:
         {
