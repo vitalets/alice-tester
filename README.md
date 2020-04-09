@@ -29,6 +29,7 @@
   * [user.webhookUrl](#userwebhookurl)
 - [Проверка времени ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%B2%D1%80%D0%B5%D0%BC%D0%B5%D0%BD%D0%B8-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
 - [Проверка размеров ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%BE%D0%B2-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
+- [Проверка стоп-слов](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%81%D1%82%D0%BE%D0%BF-%D1%81%D0%BB%D0%BE%D0%B2)
 - [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
 - [История версий](#%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D0%B9)
 - [Лицензия](#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
@@ -131,6 +132,7 @@ $ mocha test.js
   * **generateUserId** `{Function}` - функция генерации `userId`. По умолчанию: `` () => `${Date.now()}-${Math.random()}` ``
   * **responseTimeout** `{Number}` - таймаут для ответа навыка (мс). По умолчанию: `1000`
   * **webhookUrl** `{String}` - дефолтный вебхук-урл. По умолчанию: `''`
+  * **stopWords** `{Array<String|RegExp>}` - список стоп-слов. По умолчанию: `undefined|null|NaN|true|false`
 
 Пример:
 ```js
@@ -226,6 +228,21 @@ Response time (1056 ms) exceeded timeout (1000 ms)
 и кидает ошибку в случае их нарушения:
 ```
 Length of response.text (1049) is greater than allowed (1024): События романа «Война и мир» происходят ... и преодолевать любые трудности.
+```
+
+## Проверка стоп-слов
+Все ответы навыка при тестировании прогоняются через фильтр стоп-слов, которые обычно сигнализируют об ошибке в навыке.
+Список стоп-слов по умолчанию:
+```
+undefined
+null
+NaN
+true
+false
+```
+Например, если в `response.text` оказалась строка `"Привет, undefined"`, то `alice-tester` автоматически бросит ошибку:
+```
+Stop word "undefined" found in response.text: "Привет, undefined"
 ```
 
 ## Отладка тестов
