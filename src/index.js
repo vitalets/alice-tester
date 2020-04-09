@@ -280,11 +280,15 @@ class User {
   }
 
   _assertStopWords() {
+    // todo: check image titles and descriptions for ItemsList
+    // todo: move to stop-words.js module
     [
       'response.text',
       'response.tts',
       'response.card.title',
       'response.card.description',
+      'response.card.header.text',
+      'response.card.footer.text',
     ].forEach(key => {
       const string = get(this._resBody, key, '');
       if (string) {

@@ -31,7 +31,6 @@
 - [Проверка размеров ответа](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%80%D0%BE%D0%B2-%D0%BE%D1%82%D0%B2%D0%B5%D1%82%D0%B0)
 - [Проверка стоп-слов](#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D1%81%D1%82%D0%BE%D0%BF-%D1%81%D0%BB%D0%BE%D0%B2)
 - [Отладка тестов](#%D0%BE%D1%82%D0%BB%D0%B0%D0%B4%D0%BA%D0%B0-%D1%82%D0%B5%D1%81%D1%82%D0%BE%D0%B2)
-- [История версий](#%D0%B8%D1%81%D1%82%D0%BE%D1%80%D0%B8%D1%8F-%D0%B2%D0%B5%D1%80%D1%81%D0%B8%D0%B9)
 - [Лицензия](#%D0%BB%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F)
 
 <!-- tocstop -->
@@ -256,9 +255,6 @@ DEBUG=alice-tester mocha test.js
 alice-tester REQUEST: {"request":{"command":"","original_utterance":"","type":"SimpleUtterance"},"session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"meta":{"locale":"ru-RU","timezone":"Europe/Moscow","client_id":"ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)","interfaces":{"screen":{}}},"version":"1.0"} +0ms
 alice-tester RESPONSE: {"version":"1.0","session":{"new":true,"user_id":"user-1","session_id":"session-1","message_id":1,"skill_id":"test-skill"},"response":{"text":"Это приватный навык и недоступен для публичного использования.","tts":"Это приватный навык и недоступен для публичного использования.","end_session":true}} +15ms
 ```
-
-## История версий
- * [0.5.0](https://github.com/vitalets/alice-tester/milestone/1?closed=1)
 
 ## Лицензия
 MIT @ [Vitaliy Potapov](https://github.com/vitalets)
