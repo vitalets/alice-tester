@@ -6,8 +6,8 @@ const fetch = require('node-fetch');
 const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
 const { throwIf } = require('throw-utils');
-const get = require('get-value');
 const { assertProtocol } = require('./assertions/protocol');
+const { assertStopWords } = require('./assertions/stop-words');
 const config = require('./config');
 const { getNlu } = require('./nlu');
 
@@ -258,8 +258,8 @@ class User {
     this._history.unshift(this._resBody.response);
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     assertProtocol(this._resBody);
+    assertStopWords(this._resBody);
     this._assertResponseTime();
-    this._assertStopWords();
     return this._resBody.response;
   }
 
@@ -295,28 +295,6 @@ class User {
     if (config.responseTimeout && responseTime > config.responseTimeout) {
       throw new Error(`Response time (${responseTime} ms) exceeded timeout (${config.responseTimeout} ms)`);
     }
-  }
-
-  _assertStopWords() {
-    // todo: check image titles and descriptions for ItemsList
-    // todo: move to stop-words.js module
-    [
-      'response.text',
-      'response.tts',
-      'response.card.title',
-      'response.card.description',
-      'response.card.header.text',
-      'response.card.footer.text',
-    ].forEach(key => {
-      const string = get(this._resBody, key, '');
-      if (string) {
-        const foundStopWord = config.stopWords.find(stopWord => typeof stopWord === 'string'
-          ? string.includes(stopWord)
-          : stopWord.test(string)
-        );
-        throwIf(foundStopWord, `Stop word "${foundStopWord}" found in ${key}: "${string}"`);
-      }
-    });
   }
 
   async _navigate(url) {
