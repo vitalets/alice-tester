@@ -2,6 +2,7 @@ describe('tap (button)', () => {
 
   it('button without payload: send command and original_utterance', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         { title: 'Да, начинаем!' }
       ]
@@ -48,6 +49,7 @@ describe('tap (button)', () => {
 
   it('button with payload: send payload, no command, no original_utterance', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         { title: 'Да', payload: {foo: 1} }
       ]
@@ -68,6 +70,7 @@ describe('tap (button)', () => {
 
   it('should set user props from response', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         { title: 'Да' }
       ]
@@ -78,6 +81,7 @@ describe('tap (button)', () => {
 
     assert.deepEqual(user.body, {
       response: {
+        text: 'text',
         buttons: [
           {title: 'Да'}
         ]
@@ -93,6 +97,7 @@ describe('tap (button)', () => {
       version: '1.0'
     });
     assert.deepEqual(user.response, {
+      text: 'text',
       buttons: [
         {title: 'Да'}
       ]
@@ -102,6 +107,7 @@ describe('tap (button)', () => {
 
   it('tap by regexp', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         {title: 'Да', payload: {foo: 1}}
       ]
@@ -122,6 +128,7 @@ describe('tap (button)', () => {
 
   it('tap with extraProps', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         { title: 'Да' }
       ]
@@ -149,6 +156,7 @@ describe('tap (button)', () => {
 
   it('throws if non matched by title', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         {title: 'Да'},
         {title: 'Нет'},
@@ -161,6 +169,7 @@ describe('tap (button)', () => {
 
   it('throws if non matched by regexp', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [
         {title: 'Да'},
         {title: 'Нет'},
@@ -174,6 +183,7 @@ describe('tap (button)', () => {
 
   it('navigate to url if button contains url', async () => {
     server.setResponse({
+      text: 'text',
       buttons: [{
         title: 'кнопка',
         url: `${server.getUrl()}/foo`
@@ -188,7 +198,10 @@ describe('tap (button)', () => {
   });
 
   it('tap non-hidden button in history', async () => {
-    server.setResponse({ buttons: [{ title: 'кнопка', hide: false }] });
+    server.setResponse({
+      text: 'text',
+      buttons: [{ title: 'кнопка', hide: false }]
+    });
     const user = new User();
     await user.enter();
 
@@ -209,7 +222,10 @@ describe('tap (button)', () => {
   });
 
   it('does not tap hidden button in history', async () => {
-    server.setResponse({ buttons: [{ title: 'кнопка', hide: true }] });
+    server.setResponse({
+      text: 'text',
+      buttons: [{ title: 'кнопка', hide: true }]
+    });
     const user = new User();
     await user.enter();
 

@@ -7,7 +7,7 @@ const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
 const { throwIf } = require('throw-utils');
 const get = require('get-value');
-const constraints = require('./constraints');
+const { assertProtocol } = require('./assertions/protocol');
 const config = require('./config');
 const { getNlu } = require('./nlu');
 
@@ -257,7 +257,7 @@ class User {
     // вставляем в историю спереди, чтобы искать всегда начиная с самых свежих изображений
     this._history.unshift(this._resBody.response);
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
-    constraints.assertResponse(this._resBody);
+    assertProtocol(this._resBody);
     this._assertResponseTime();
     this._assertStopWords();
     return this._resBody.response;

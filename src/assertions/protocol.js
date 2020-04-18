@@ -1,7 +1,7 @@
 /**
  * Protocol constraints.
  */
-
+const { throwIf } = require('throw-utils');
 const get = require('get-value');
 
 const MAX_LENGTHS = {
@@ -11,19 +11,36 @@ const MAX_LENGTHS = {
   'response.buttons.$i.url': 1024,
 };
 
-exports.assertResponse = body => {
-  assertPropLength(body, 'response.text');
-  assertPropLength(body, 'response.tts');
-  assertButtons(body);
+/**
+ * Проверяем обязательные поля.
+ * Проверяем допустимые размеры полей.
+ * todo: use json-micro-schema
+ *
+ * @param {object} resBody
+ */
+exports.assertProtocol = resBody => {
+  assertRequiredProps(resBody);
+  assertPropLength(resBody, 'response.text');
+  assertPropLength(resBody, 'response.tts');
+  assertButtons(resBody);
+};
+
+const assertRequiredProps = resBody => {
+  const requiredProps = [
+    'response.text',
+    'session',
+    'version',
+  ];
+  for (const prop of requiredProps) {
+    throwIf(!get(resBody, prop), `Отсутствует обязательное поле "${prop}"`);
+  }
 };
 
 const assertPropLength = (obj, key, index) => {
   const indexedKey = index !== undefined ? key.replace('$i', index) : key;
   const value = get(obj, indexedKey, '');
   const maxLength = MAX_LENGTHS[key];
-  if (value.length > maxLength) {
-    throw new Error(buildErrorMessage(indexedKey, value, maxLength));
-  }
+  throwIf(value.length > maxLength, () => buildErrorMessage(indexedKey, value, maxLength));
 };
 
 const assertButtons = body => {
