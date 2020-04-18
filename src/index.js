@@ -9,7 +9,7 @@ const { throwIf } = require('throw-utils');
 const get = require('get-value');
 const constraints = require('./constraints');
 const config = require('./config');
-const getEntities = require('./entities');
+const { getNlu } = require('./nlu');
 
 const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
 
@@ -151,16 +151,12 @@ class User {
 
   _buildSimpleUtteranceRequest(userMessage) {
     const command = normalizeCommand(userMessage);
-    const tokens = command ? command.split(/\s+/) : [];
-    const entities = getEntities(tokens);
+    const nlu = getNlu(command);
     return {
       command,
       original_utterance: userMessage,
       type: 'SimpleUtterance',
-      nlu: {
-        tokens,
-        entities,
-      },
+      nlu,
       markup: {
         dangerous_context: false
       },

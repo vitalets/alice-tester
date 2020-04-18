@@ -1,13 +1,21 @@
 /**
- * nlu.entities
+ * nlu
  */
 
-module.exports = tokens => {
-  return []
-    .concat(getNumbers(tokens));
+exports.getNlu = command => {
+  const tokens = getTokens(command);
+  // todo: пока поддерживаются только целые числа!
+  const entities = getNumbers(tokens);
+  return {
+    tokens,
+    entities,
+  };
 };
 
-// todo: пока поддерживаются только целые числа!
+const getTokens = command => {
+  return command ? command.split(/\s+/) : [];
+};
+
 const getNumbers = tokens => {
   return tokens.reduce((acc, token, i) => {
     if (/\d+/.test(token)) {
