@@ -11,9 +11,13 @@ const { assertStopWords } = require('./assertions/stop-words');
 const { assertResponseTime } = require('./assertions/response-time');
 const { getWebhookUrl } = require('./webhook');
 const config = require('./config');
-const { getNlu } = require('./nlu');
-
-const NEW_SESSION_ORIGINAL_UTTERANCE = 'запусти навык тест';
+const {
+  buildReqBody,
+  buildEnterRequest,
+  buildSimpleUtteranceRequest,
+  buildButtonPressedRequest,
+  buildSessionObject,
+} = require('./request-builders');
 
 class User {
   static extractUserId(reqBody) {
@@ -71,14 +75,13 @@ class User {
   async enter(message = '', extraProps = {}) {
     this._sessionsCount++;
     this._messagesCount = 0;
-    const request = this._buildSimpleUtteranceRequest(message);
-    request.original_utterance = `${NEW_SESSION_ORIGINAL_UTTERANCE}${message === '' ? '' : ` ${message}`}`;
+    const request = buildEnterRequest(message);
     return this._sendRequest(request, extraProps);
   }
 
   async say(message, extraProps = {}) {
     throwIf(!message, `Нельзя отправить пустое сообщение от пользователя.`);
-    const request = this._buildSimpleUtteranceRequest(message);
+    const request = buildSimpleUtteranceRequest(message);
     return this._sendRequest(request, extraProps);
   }
 
@@ -125,77 +128,28 @@ class User {
       return this._navigate(url);
     } else {
       const request = payload
-        ? this._buildButtonPressedRequest(payload)
-        : this._buildSimpleUtteranceRequest(title);
+        ? buildButtonPressedRequest(payload)
+        : buildSimpleUtteranceRequest(title);
       return this._sendRequest(request, extraProps);
     }
   }
 
   async _sendRequest(request, extraProps) {
-    this._resBody = null;
-    this._messagesCount++;
     this._buildReqBody(request, extraProps);
     return this._post();
   }
 
   _buildReqBody(request, extraProps) {
-    this._reqBody = {
-      request,
-      session: this._buildSessionObject(),
-      meta: this._buildMetaObject(),
-      version: '1.0',
-    };
+    const session = buildSessionObject({
+      userId: this.id,
+      sessionId: this.sessionId,
+      messagesCount: ++this._messagesCount,
+    });
+    this._reqBody = buildReqBody({ request, session });
     this._mergeExtraProps(this._extraProps);
     this._mergeExtraProps(extraProps);
     // sometimes userId is defined via function in extraProps and available only after the request body formed.
     this._updateUserIdIfNeeded();
-  }
-
-  _buildSimpleUtteranceRequest(userMessage) {
-    const command = normalizeCommand(userMessage);
-    const nlu = getNlu(command);
-    return {
-      command,
-      original_utterance: userMessage,
-      type: 'SimpleUtterance',
-      nlu,
-      markup: {
-        dangerous_context: false
-      },
-    };
-  }
-
-  _buildButtonPressedRequest(payload) {
-    // при нажатии на кнопку с payload в запросе не приходят command, original_utterance, markup
-    return {
-      payload,
-      type: 'ButtonPressed',
-      nlu: {
-        tokens: [],
-        entities: [],
-      },
-    };
-  }
-
-  _buildSessionObject() {
-    return {
-      new: this._messagesCount === 1,
-      user_id: this.id,
-      session_id: this.sessionId,
-      message_id: this._messagesCount,
-      skill_id: 'test-skill',
-    };
-  }
-
-  _buildMetaObject() {
-    return {
-      locale: 'ru-RU',
-      timezone: 'Europe/Moscow',
-      client_id: 'ru.yandex.searchplugin/5.80 (Samsung Galaxy; Android 4.4)',
-      interfaces: {
-        screen: {}
-      }
-    };
   }
 
   /**
@@ -266,6 +220,7 @@ class User {
   }
 
   async _handleError(response) {
+    this._resBody = null;
     const text = await response.text();
     debug(`RESPONSE: ${text}`);
     throw new Error(text);
@@ -280,23 +235,11 @@ class User {
 
   async _navigate(url) {
     this._resBody = null;
-    const response = await fetch(url);
+    const response = await fetch(url, { method: 'get' });
     this._resBody = await response.text();
     return this._resBody;
   }
 }
-
-const normalizeCommand = message => {
-  return message
-  // приводим к нижнему регистру
-    .toLowerCase()
-    // удаляем знаки препинания
-    .replace(/[,.!?]/g, '')
-    // удаляем повторяющиеся пробелы
-    .replace(/\s+/g, ' ')
-    // отрезаем пробелы в начале и конце
-    .trim();
-};
 
 /**
  * Создает матчер-функцию для кнопок.
