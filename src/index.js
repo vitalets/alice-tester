@@ -75,6 +75,7 @@ class User {
   }
 
   async say(message, extraProps = {}) {
+    throwIf(!message, `Нельзя отправить пустое сообщение от пользователя.`);
     const request = this._buildSimpleUtteranceRequest(message);
     return this._sendRequest(request, extraProps);
   }

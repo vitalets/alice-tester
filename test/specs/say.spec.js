@@ -217,4 +217,11 @@ describe('say', () => {
 
     await assert.rejects(user.say('Что ты умеешь?'), /Response time \(\d+ ms\) exceeded timeout \(100 ms\)/);
   });
+
+  it('throws for empty message', async () => {
+    const user = new User();
+    await user.enter();
+
+    await assert.rejects(user.say(), /Нельзя отправить пустое сообщение от пользователя/);
+  });
 });
