@@ -9,6 +9,7 @@ const { throwIf } = require('throw-utils');
 const { assertProtocol } = require('./assertions/protocol');
 const { assertStopWords } = require('./assertions/stop-words');
 const { assertResponseTime } = require('./assertions/response-time');
+const { getWebhookUrl } = require('./webhook');
 const config = require('./config');
 const { getNlu } = require('./nlu');
 
@@ -24,7 +25,7 @@ class User {
    * @param {Object|Function} [extraProps] extraProps applied to every request
    */
   constructor(webhookUrl = '', extraProps = {}) {
-    this._setWebhookUrl(webhookUrl || config.webhookUrl);
+    this._webhookUrl = getWebhookUrl(webhookUrl || config.webhookUrl);
     this._extraProps = extraProps;
     this._id = User.extractUserId(extraProps) || config.generateUserId();
     this._sessionsCount = 0;
@@ -255,7 +256,7 @@ class User {
 
   async _handleSuccess(response) {
     this._resBody = await response.json();
-    // вставляем в историю спереди, чтобы искать всегда начиная с самых свежих изображений
+    // вставляем в историю спереди, чтобы искать всегда начиная с самых последних ответов
     this._history.unshift(this._resBody.response);
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     assertProtocol(this._resBody);
@@ -268,20 +269,6 @@ class User {
     const text = await response.text();
     debug(`RESPONSE: ${text}`);
     throw new Error(text);
-  }
-
-  _setWebhookUrl(webhookUrl) {
-    if (!webhookUrl) {
-      throw new Error(`You should provide webhookUrl`);
-    }
-
-    if (typeof webhookUrl === 'string') {
-      this._webhookUrl = webhookUrl;
-    } else {
-      const {address, port} = webhookUrl.address();
-      const ip = ['0.0.0.0', '::'].includes(address) ? 'localhost' : address;
-      this._webhookUrl = `http://${ip}:${port}`;
-    }
   }
 
   _updateUserIdIfNeeded() {
