@@ -8,6 +8,7 @@ const debug = require('debug')('alice-tester');
 const { throwIf } = require('throw-utils');
 const { assertProtocol } = require('./assertions/protocol');
 const { assertStopWords } = require('./assertions/stop-words');
+const { assertResponseTime } = require('./assertions/response-time');
 const config = require('./config');
 const { getNlu } = require('./nlu');
 
@@ -259,7 +260,7 @@ class User {
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     assertProtocol(this._resBody);
     assertStopWords(this._resBody);
-    this._assertResponseTime();
+    assertResponseTime(this._reqTimestamp);
     return this._resBody.response;
   }
 
@@ -287,13 +288,6 @@ class User {
     const userIdInReqBody = User.extractUserId(this._reqBody);
     if (userIdInReqBody !== this._id) {
       this._id = userIdInReqBody;
-    }
-  }
-
-  _assertResponseTime() {
-    const responseTime = Date.now() - this._reqTimestamp;
-    if (config.responseTimeout && responseTime > config.responseTimeout) {
-      throw new Error(`Response time (${responseTime} ms) exceeded timeout (${config.responseTimeout} ms)`);
     }
   }
 
