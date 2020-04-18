@@ -28,6 +28,10 @@ const defaults = {
     'NaN',
     'true',
     'false',
+    'object',
+    'Infinity',
+    'Error',
+    'function',
   ],
 };
 
