@@ -11,7 +11,7 @@ describe('tap (items list)', () => {
     await user.enter();
     const promise = user.tapImage('картинка');
 
-    await assert.rejects(promise, /Предыдущий запрос не вернул изображений/);
+    await assert.rejects(promise, /Изображение с кнопкой "картинка" не найдено/);
   });
 
   it('throws for no items with "button" field', async () => {
@@ -29,7 +29,7 @@ describe('tap (items list)', () => {
     await user.enter();
     const promise = user.tapImage('картинка');
 
-    await assert.rejects(promise, /Предыдущий запрос не вернул изображений с кнопками/);
+    await assert.rejects(promise, /Изображение с кнопкой "картинка" не найдено/);
   });
 
   it('throws for empty title in tapImage()', async () => {
@@ -48,7 +48,7 @@ describe('tap (items list)', () => {
     await user.enter();
     const promise = user.tapImage();
 
-    await assert.rejects(promise, /Необходимо задать title кнопки для нажатия/);
+    await assert.rejects(promise, /Для tapImage\(\) без параметра нужен bigImage с кнопкой в ответе/);
   });
 
   it('empty image button: send image title', async () => {
@@ -163,7 +163,7 @@ describe('tap (items list)', () => {
     });
     const user = new User();
     await user.enter();
-    server.setHandlerReqInfo();
+    server.setEchoHandler();
     await user.tapImage('картинка!');
 
     assert.equal(user.body, '{"method":"GET","url":"/foo"}');
@@ -232,9 +232,45 @@ describe('tap (items list)', () => {
     const user = new User();
     await user.enter();
     const promise = user.tapImage('блабла');
-    await assert.rejects(promise,
-      /Кнопка "блабла" не найдена среди возможных кнопок: картинка!, куку/
-    );
+    await assert.rejects(promise, /Изображение с кнопкой "блабла" не найдено/);
+  });
+
+  it('tap image item in history', async () => {
+    server.setResponse({
+      text: 'text',
+      card: {
+        type: 'ItemsList',
+        items: [{
+          image_id: '123',
+          title: 'картинка!',
+          button: {
+            text: 'привет!'
+          }
+        }]
+      }
+    });
+    const user = new User();
+    await user.enter();
+
+    server.setResponse({ text: 'text' });
+    await user.say('bla bla');
+
+    await user.tapImage('привет!');
+
+    assert.deepEqual(server.requests[2].request, {
+      command: 'привет',
+      original_utterance: 'привет!',
+      type: 'SimpleUtterance',
+      nlu: {
+        tokens: [
+          'привет',
+        ],
+        entities: [],
+      },
+      markup: {
+        dangerous_context: false
+      },
+    });
   });
 
 });

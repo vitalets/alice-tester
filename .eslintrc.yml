@@ -29,7 +29,8 @@ rules:
       ignoreUrls: true
   max-lines:
     - error
-    - max: 250
+    # todo: revert to 200 after refactoring
+    - max: 280
       skipComments: true
       skipBlankLines: true
   semi:

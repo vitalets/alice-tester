@@ -30,7 +30,7 @@ server.close = promisify(server.close);
 server.requests = [];
 server.getUrl = () => `http://localhost:${server.address().port}`;
 server.setHandler = newHandler => handler = newHandler;
-server.setHandlerReqInfo = () => server.setHandler(req => {
+server.setEchoHandler = () => server.setHandler(req => {
   return {
     method: req.method,
     url: req.url,

@@ -5,7 +5,7 @@
 const fetch = require('node-fetch');
 const merge = require('lodash.merge');
 const debug = require('debug')('alice-tester');
-const { throwIf, throwError } = require('throw-utils');
+const { throwIf } = require('throw-utils');
 const get = require('get-value');
 const constraints = require('./constraints');
 const config = require('./config');
@@ -28,6 +28,7 @@ class User {
     this._id = User.extractUserId(extraProps) || config.generateUserId();
     this._sessionsCount = 0;
     this._messagesCount = 0;
+    this._history = [];
     this._reqTimestamp = 0;
     this._reqBody = null;
     this._resBody = null;
@@ -40,6 +41,10 @@ class User {
 
   get sessionId() {
     return `session-${this._sessionsCount}`;
+  }
+
+  get history() {
+    return this._history;
   }
 
   get response() {
@@ -82,35 +87,32 @@ class User {
    * @returns {Promise}
    */
   async tap(title, extraProps = {}) {
-    const buttons = this.response.buttons;
-    throwIf(!Array.isArray(buttons) || !buttons.length, `Предыдущий запрос не вернул ни одной кнопки.`);
-    const button = this._findButton(buttons, title);
+    throwIf(!title, `Необходимо задать title кнопки для нажатия.`);
+    const matcherFn = createButtonMatcherFn(title);
+    const button = this._findButtonInSuggest(matcherFn) || this._findButtonInHistory(matcherFn);
+    throwIf(!button, `Кнопка "${title}" не найдена.`);
     return this._sendTapRequest(button, extraProps);
   }
 
   /**
    * Tap on BigImage or image in ItemsList.
    *
-   * @param {String|RegExp} [title]
+   * @param {String|RegExp} [title] если title не задан, то тап в BigImage последнего запроса
    * @param {Object} [extraProps]
    * @returns {Promise}
    */
   async tapImage(title, extraProps = {}) {
-    throwIf(!this.response.card, `Предыдущий запрос не вернул поле card.`);
-    const isBigImage = this.response.card.type === 'BigImage';
-    const items = isBigImage ? [this.response.card] : this.response.card.items;
-    throwIf(!Array.isArray(items) || !items.length, `Предыдущий запрос не вернул изображений.`);
-    const itemsWithButton = items.filter(item => item.button);
-    throwIf(!itemsWithButton.length, `Предыдущий запрос не вернул изображений с кнопками.`);
-    // Кнопки в изображениях имеют свойство text, а не title. Но если text не задан, то используется title изображения.
-    // Поэтому тут для удобства приводим кнопки-изображения к формату обычных кнопок, задавая им title.
-    const buttons = itemsWithButton.map(item => ({
-      title: item.button.text || item.title,
-      url: item.button.url,
-      payload: item.button.payload,
-    }));
-    const button = isBigImage ? buttons[0] : this._findButton(buttons, title);
-    return this._sendTapRequest(button, extraProps);
+    let imageButton;
+    if (!title) {
+      const lastCard = this.response.card;
+      throwIf(!lastCard || !lastCard.button, `Для tapImage() без параметра нужен bigImage с кнопкой в ответе.`);
+      imageButton = image2Button(lastCard);
+    } else {
+      const matcherFn = createButtonMatcherFn(title);
+      imageButton = this._findImageButtonInHistory(matcherFn);
+      throwIf(!imageButton, `Изображение с кнопкой "${title}" не найдено.`);
+    }
+    return this._sendTapRequest(imageButton, extraProps);
   }
 
   async _sendTapRequest({ title, payload, url }, extraProps) {
@@ -212,17 +214,32 @@ class User {
     }
   }
 
-  _findButton(buttons, title) {
-    throwIf(!title, `Необходимо задать title кнопки для нажатия.`);
-    const matchButton = typeof title === 'string'
-      ? button => button.title === title
-      : button => title.test(button.title);
-    const button = buttons.find(matchButton);
-    return button || throwError(
-      `Кнопка "${title}" не найдена среди возможных кнопок: ${buttons.map(b => b.title).join(', ')}.`
-    );
+  _findButtonInSuggest(matcherFn) {
+    const suggestButtons = (this.response.buttons || []).filter(button => button.hide);
+    return suggestButtons.find(matcherFn);
   }
 
+  _findButtonInHistory(matcherFn) {
+    for (const response of this._history) {
+      const visibleButtons = (response.buttons || []).filter(button => !button.hide);
+      const button = visibleButtons.find(matcherFn);
+      if (button) {
+        return button;
+      }
+    }
+  }
+
+  _findImageButtonInHistory(matcherFn) {
+    const imageResponses = this._history.filter(response => response.card);
+    for (const response of imageResponses) {
+      const imagesWithButton = (response.card.items || [ response.card ]).filter(item => item.button);
+      const buttons = imagesWithButton.map(image2Button);
+      const button = buttons.find(matcherFn);
+      if (button) {
+        return button;
+      }
+    }
+  }
 
   async _post() {
     const headers = {
@@ -233,11 +250,15 @@ class User {
     debug(`REQUEST: ${body}`);
     this._reqTimestamp = Date.now();
     const response = await fetch(this._webhookUrl, { method: 'post', headers, body });
-    return response.ok ? this._handleSuccess(response) : this._handleError(response);
+    return response.ok
+      ? this._handleSuccess(response)
+      : this._handleError(response);
   }
 
   async _handleSuccess(response) {
     this._resBody = await response.json();
+    // вставляем в историю спереди, чтобы искать всегда начиная с самых свежих изображений
+    this._history.unshift(this._resBody.response);
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     constraints.assertResponse(this._resBody);
     this._assertResponseTime();
@@ -320,6 +341,29 @@ const normalizeCommand = message => {
     // отрезаем пробелы в начале и конце
     .trim();
 };
+
+/**
+ * Создает матчер-функцию для кнопок.
+ */
+const createButtonMatcherFn = title => {
+  return typeof title === 'string'
+    ? button => button.title === title
+    : button => title.test(button.title);
+};
+
+/**
+ * Кнопки в изображениях имеют свойство text, а не title.
+ * Но если text не задан, то используется title (чаще всего так и бывает).
+ * Поэтому для удобства приводим кнопки-изображения к формату обычных кнопок, задавая им всегда title.
+ *
+ * @param {object} image
+ * @returns {object}
+ */
+const image2Button = image => ({
+  title: image.button.text || image.title,
+  url: image.button.url,
+  payload: image.button.payload,
+});
 
 User.config = config;
 

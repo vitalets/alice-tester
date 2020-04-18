@@ -144,7 +144,7 @@ describe('tap (button)', () => {
   it('throws for missing buttons', async () => {
     const user = new User();
     await user.enter();
-    await assert.rejects(user.tap('Да'), /Предыдущий запрос не вернул ни одной кнопки/);
+    await assert.rejects(user.tap('Да'), /Кнопка "Да" не найдена/);
   });
 
   it('throws if non matched by title', async () => {
@@ -156,9 +156,7 @@ describe('tap (button)', () => {
     });
     const user = new User();
     await user.enter();
-    await assert.rejects(user.tap('Ок'),
-      /Кнопка "Ок" не найдена среди возможных кнопок: Да, Нет./
-    );
+    await assert.rejects(user.tap('Ок'), /Кнопка "Ок" не найдена/);
   });
 
   it('throws if non matched by regexp', async () => {
@@ -171,9 +169,7 @@ describe('tap (button)', () => {
 
     const user = new User();
     await user.enter();
-    await assert.rejects(user.tap(/помощь/i),
-      /Кнопка "\/помощь\/i" не найдена среди возможных кнопок: Да, Нет./
-    );
+    await assert.rejects(user.tap(/помощь/i), /Кнопка "\/помощь\/i" не найдена/);
   });
 
   it('navigate to url if button contains url', async () => {
@@ -185,10 +181,42 @@ describe('tap (button)', () => {
     });
     const user = new User();
     await user.enter();
-    server.setHandlerReqInfo();
+    server.setEchoHandler();
     await user.tap('кнопка');
 
     assert.equal(user.body, '{"method":"GET","url":"/foo"}');
+  });
+
+  it('tap non-hidden button in history', async () => {
+    server.setResponse({ buttons: [{ title: 'кнопка', hide: false }] });
+    const user = new User();
+    await user.enter();
+
+    server.setResponse({ text: 'привет' });
+    await user.say('blabla');
+
+    await user.tap('кнопка');
+
+    assert.deepEqual(server.requests[2].request, {
+      command: 'кнопка',
+      original_utterance: 'кнопка',
+      type: 'SimpleUtterance',
+      nlu: { tokens: [ 'кнопка' ], entities: [] },
+      markup: {
+        dangerous_context: false
+      }
+    });
+  });
+
+  it('does not tap hidden button in history', async () => {
+    server.setResponse({ buttons: [{ title: 'кнопка', hide: true }] });
+    const user = new User();
+    await user.enter();
+
+    server.setResponse({ text: 'привет' });
+    await user.say('blabla');
+
+    await assert.rejects(user.tap('кнопка'), /Кнопка "кнопка" не найдена/);
   });
 });
 

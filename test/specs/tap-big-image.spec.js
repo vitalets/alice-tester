@@ -1,15 +1,15 @@
 describe('tap (big image)', () => {
 
-  it('throws for missing "card" field', async () => {
+  it('throws for missing title params', async () => {
     server.setResponse({
       text: 'text',
     });
     const user = new User();
     await user.enter();
-    await assert.rejects(user.tapImage(), /Предыдущий запрос не вернул поле card/);
+    await assert.rejects(user.tapImage(), /Для tapImage\(\) без параметра нужен bigImage с кнопкой в ответе/);
   });
 
-  it('throws for missing image "button" field', async () => {
+  it('throws for big image without button', async () => {
     server.setResponse({
       text: 'text',
       card: {
@@ -20,7 +20,8 @@ describe('tap (big image)', () => {
     });
     const user = new User();
     await user.enter();
-    await assert.rejects(user.tapImage(), /Предыдущий запрос не вернул изображений с кнопками/);
+    await user.say('куку');
+    await assert.rejects(user.tapImage(), /Для tapImage\(\) без параметра нужен bigImage с кнопкой в ответе/);
   });
 
   it('empty image button: send image title', async () => {
@@ -127,7 +128,7 @@ describe('tap (big image)', () => {
     });
     const user = new User();
     await user.enter();
-    server.setHandlerReqInfo();
+    server.setEchoHandler();
     await user.tapImage();
 
     assert.equal(user.body, '{"method":"GET","url":"/foo"}');
@@ -155,6 +156,42 @@ describe('tap (big image)', () => {
       markup: {
         dangerous_context: true
       }
+    });
+  });
+
+  it('tap big image in history', async () => {
+    server.setResponse({
+      text: 'text',
+      card: {
+        type: 'BigImage',
+        image_id: '123',
+        title: 'картинка!',
+        button: {
+          // пустая кнопка: отправляет title
+        }
+      }
+    });
+    const user = new User();
+    await user.enter();
+
+    server.setResponse({ text: 'text' });
+    await user.say('bla bla');
+
+    await user.tapImage('картинка!');
+
+    assert.deepEqual(server.requests[2].request, {
+      command: 'картинка',
+      original_utterance: 'картинка!',
+      type: 'SimpleUtterance',
+      nlu: {
+        tokens: [
+          'картинка',
+        ],
+        entities: [],
+      },
+      markup: {
+        dangerous_context: false
+      },
     });
   });
 

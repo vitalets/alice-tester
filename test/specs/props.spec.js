@@ -31,4 +31,23 @@ describe('props', () => {
     await user.enter();
     assert.equal(user.id, 'foo');
   });
+
+  it('history', async () => {
+    const user = new User();
+
+    server.setResponse({ text: 'привет' });
+    await user.enter();
+
+    server.setResponse({ text: 'как дела?' });
+    await user.say('блабла');
+
+    server.setResponse({ text: 'пока' });
+    await user.say('блабла');
+
+    assert.deepEqual(user.history, [
+      { text: 'пока' },
+      { text: 'как дела?' },
+      { text: 'привет' }
+    ]);
+  });
 });
