@@ -28,7 +28,6 @@ exports.assertProtocol = resBody => {
 const assertRequiredProps = resBody => {
   const requiredProps = [
     'response.text',
-    'session',
     'version',
   ];
   for (const prop of requiredProps) {
