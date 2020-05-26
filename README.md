@@ -1,6 +1,6 @@
 # alice-tester
 
-[![Build Status](https://travis-ci.org/vitalets/alice-tester.svg?branch=master)](https://travis-ci.org/vitalets/alice-tester)
+[![Actions Status](https://github.com/vitalets/alice-tester/workflows/autotests/badge.svg)](https://github.com/vitalets/alice-tester/actions)
 [![Coverage Status](https://coveralls.io/repos/github/vitalets/alice-tester/badge.svg?branch=master)](https://coveralls.io/github/vitalets/alice-tester?branch=master)
 [![npm](https://img.shields.io/npm/v/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 [![license](https://img.shields.io/npm/l/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
