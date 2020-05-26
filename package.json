@@ -15,8 +15,6 @@
     "test": "mocha test/setup.js test/specs/*.js",
     "test:cov": "nyc --reporter=html npm t && nyc report && nyc check-coverage --lines 100",
     "open:cov": "open coverage/index.html",
-    "ci": "run-s lint test:cov",
-    "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "toc": "markdown-toc README.md -i",
     "prerelease": "run-s lint test:cov",
     "postrelease": "git push --follow-tags --no-verify",
