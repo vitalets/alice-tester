@@ -18,13 +18,12 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install dependencies
-      run: npm ci
+    - run: npm ci
+    - run: npm run test:cov
 
-    - name: Run tests
-      run: |
-        npm run test:cov
-        npx nyc report --reporter=lcov
+    - name: Generate lcov report
+      if: matrix.node-version == 10
+      run: npx nyc report --reporter=lcov
 
     - name: Run coveralls
       uses: coverallsapp/github-action@master
