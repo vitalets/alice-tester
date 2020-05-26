@@ -2,6 +2,7 @@
 
 [![Actions Status](https://github.com/vitalets/alice-tester/workflows/autotests/badge.svg)](https://github.com/vitalets/alice-tester/actions)
 [![Coverage Status](https://coveralls.io/repos/github/vitalets/alice-tester/badge.svg?branch=master)](https://coveralls.io/github/vitalets/alice-tester?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/vitalets/alice-tester/badge.svg?targetFile=package.json)](https://snyk.io/test/github/vitalets/alice-tester?targetFile=package.json)
 [![npm](https://img.shields.io/npm/v/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 [![license](https://img.shields.io/npm/l/alice-tester.svg)](https://www.npmjs.com/package/alice-tester)
 
