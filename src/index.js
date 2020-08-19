@@ -202,7 +202,7 @@ class User {
     const body = JSON.stringify(this._reqBody);
     debug(`REQUEST: ${body}`);
     this._reqTimestamp = Date.now();
-    const response = await fetch(this._webhookUrl, { method: 'post', headers, body });
+    const response = await fetch(this._webhookUrl, { method: 'POST', headers, body });
     return response.ok
       ? this._handleSuccess(response)
       : this._handleError(response);
@@ -235,7 +235,7 @@ class User {
 
   async _navigate(url) {
     this._resBody = null;
-    const response = await fetch(url, { method: 'get' });
+    const response = await fetch(url, { method: 'GET' });
     this._resBody = await response.text();
     return this._resBody;
   }
