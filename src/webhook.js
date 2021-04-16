@@ -4,19 +4,21 @@
 const { throwIf } = require('throw-utils');
 
 /**
- * Проверяем время ответа.
+ * Получаем вебхук.
  *
- * @param {String|http.Server} passedWebhookUrl
+ * @param {String|Function|http.Server} passedWebhookUrl
  */
 exports.getWebhookUrl = passedWebhookUrl => {
   throwIf(!passedWebhookUrl, `You should provide webhookUrl`);
 
-  return typeof passedWebhookUrl === 'string'
-    ? passedWebhookUrl
-    : getWebhookUrlFromServer(passedWebhookUrl);
+  if ([ 'string', 'function' ].includes(typeof passedWebhookUrl)) {
+    return passedWebhookUrl;
+  } else {
+    return buildWebhookUrlFromServer(passedWebhookUrl);
+  }
 };
 
-const getWebhookUrlFromServer = server => {
+const buildWebhookUrlFromServer = server => {
   const { address, port } = server.address();
   const ip = ['0.0.0.0', '::'].includes(address) ? 'localhost' : address;
   return `http://${ip}:${port}`;

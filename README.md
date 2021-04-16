@@ -132,7 +132,7 @@ $ mocha test.js
 Глобальный конфиг класса `User`:
   * **generateUserId** `{Function}` - функция генерации `userId`. По умолчанию: `` () => `${Date.now()}-${Math.random()}` ``
   * **responseTimeout** `{Number}` - таймаут для ответа навыка (мс). По умолчанию: `1000`
-  * **webhookUrl** `{String}` - дефолтный вебхук-урл. По умолчанию: `''`
+  * **webhookUrl** `{String|Function|HTTP.Server}` - дефолтный вебхук-урл. По умолчанию: `''`
   * **stopWords** `{Array<String|RegExp>}` - список стоп-слов. По умолчанию: `undefined|null|NaN|true|false`
 
 Пример:
@@ -145,7 +145,7 @@ User.config.webhookUrl = 'http://localhost:3000';
 ### new User([webhookUrl], [extraProps])
 Создание нового пользователя для теста.  
 **Параметры:**
-  * **webhookUrl** `{?String|http.Server}` - вебхук-урл навыка в виде строки или инстанса `http.Server`. Если не передан, используется дефолтный из `User.config.webhookUrl`.
+  * **webhookUrl** `{?String|Function|HTTP.Server}` - вебхук-урл навыка в виде строки или инстанса `http.Server`. Если не передан, используется дефолтный из `User.config.webhookUrl`.
   * **extraProps** `{?Object|Function}` - объект с полями, которые будут добавлены к каждому запросу, либо функция модификации тела запроса.
 
 Примеры:

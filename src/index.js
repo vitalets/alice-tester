@@ -136,7 +136,41 @@ class User {
 
   async _sendRequest(request, extraProps) {
     this._buildReqBody(request, extraProps);
-    return this._post();
+    this._resBody = null;
+    this._reqTimestamp = Date.now();
+    const isWebhookFunction = typeof this._webhookUrl === 'function';
+    this._resBody = await (isWebhookFunction ? this._callWebhook() : this._post());
+    this._handleResponse();
+    return this._resBody.response;
+  }
+
+  async _callWebhook() {
+    return this._webhookUrl(this._reqBody);
+  }
+
+  async _post() {
+    const headers = {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    };
+    const body = JSON.stringify(this._reqBody);
+    const response = await fetch(this._webhookUrl, { method: 'POST', headers, body });
+    if (response.ok) {
+      return response.json();
+    } else {
+      const text = await response.text();
+      const status = response.status;
+      throw new Error(`${status} ${text}`);
+    }
+  }
+
+  _handleResponse() {
+    // вставляем в историю спереди, чтобы искать всегда начиная с самых последних ответов
+    this._history.unshift(this._resBody.response);
+    debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
+    assertProtocol(this._resBody);
+    assertStopWords(this._resBody);
+    assertResponseTime(this._reqTimestamp);
   }
 
   _buildReqBody(request, extraProps) {
@@ -150,6 +184,7 @@ class User {
     this._mergeExtraProps(extraProps);
     // sometimes userId is defined via function in extraProps and available only after the request body formed.
     this._updateUserIdIfNeeded();
+    debug(`REQUEST: ${JSON.stringify(this._reqBody)}`);
   }
 
   /**
@@ -192,38 +227,6 @@ class User {
         return button;
       }
     }
-  }
-
-  async _post() {
-    const headers = {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    };
-    const body = JSON.stringify(this._reqBody);
-    debug(`REQUEST: ${body}`);
-    this._reqTimestamp = Date.now();
-    const response = await fetch(this._webhookUrl, { method: 'POST', headers, body });
-    return response.ok
-      ? this._handleSuccess(response)
-      : this._handleError(response);
-  }
-
-  async _handleSuccess(response) {
-    this._resBody = await response.json();
-    // вставляем в историю спереди, чтобы искать всегда начиная с самых последних ответов
-    this._history.unshift(this._resBody.response);
-    debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
-    assertProtocol(this._resBody);
-    assertStopWords(this._resBody);
-    assertResponseTime(this._reqTimestamp);
-    return this._resBody.response;
-  }
-
-  async _handleError(response) {
-    this._resBody = null;
-    const text = await response.text();
-    debug(`RESPONSE: ${text}`);
-    throw new Error(text);
   }
 
   _updateUserIdIfNeeded() {
