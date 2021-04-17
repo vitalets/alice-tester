@@ -11,6 +11,7 @@
     "url": "git://github.com/vitalets/alice-tester.git"
   },
   "scripts": {
+    "init": "mkdir -p .hooks && git config core.hooksPath ./.hooks",
     "lint": "eslint src test",
     "test": "mocha test/setup.js test/specs/*.js",
     "test:cov": "nyc --reporter=html npm t && nyc report && nyc check-coverage --lines 100",
@@ -49,7 +50,6 @@
     "eslint": "^7.24.0",
     "eslint-plugin-mocha": "^8.1.0",
     "get-port": "^5.1.1",
-    "husky": "^6.0.0",
     "lint-staged": "^10.5.4",
     "markdown-toc": "^1.2.0",
     "micro": "^9.3.4",
