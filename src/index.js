@@ -38,7 +38,7 @@ class User {
     this._reqTimestamp = 0;
     this._reqBody = null;
     this._resBody = null;
-    debug(`NEW USER for ${this._webhookUrl}`);
+    debug(`NEW USER created`);
   }
 
   get id() {
