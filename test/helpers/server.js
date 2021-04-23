@@ -36,7 +36,10 @@ server.setEchoHandler = () => server.setHandler(req => {
     url: req.url,
   };
 });
-server.setResponseBody = responseBody => server.setHandler(() => responseBody);
+server.setResponseBody = responseBody => server.setHandler(() => {
+  responseBody.version = responseBody.version || '1.0';
+  return responseBody;
+});
 server.setResponse = response => server.setHandler(req => {
   const {version} = req.body;
   return {response, version};

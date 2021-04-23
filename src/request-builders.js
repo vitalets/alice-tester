@@ -3,11 +3,13 @@
  */
 const { getNlu } = require('./nlu');
 
-const buildReqBody = ({ request, session }) => {
+const buildReqBody = ({ request, session, state }) => {
+  state = buildStateObject(state);
   return {
     request,
     session,
     meta: buildMetaObject(),
+    ...(state ? { state } : {}),
     version: '1.0',
   };
 };
@@ -66,6 +68,10 @@ const buildMetaObject = () => {
       screen: {}
     }
   };
+};
+
+const buildStateObject = state => {
+  return (state && Object.keys(state).length > 0) ? state : null;
 };
 
 const buildCommand = message => {

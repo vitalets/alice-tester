@@ -38,6 +38,7 @@ class User {
     this._reqTimestamp = 0;
     this._reqBody = null;
     this._resBody = null;
+    this._state = {};
     debug(`NEW USER created`);
   }
 
@@ -65,6 +66,10 @@ class User {
     return this._webhookUrl;
   }
 
+  get state() {
+    return this._state;
+  }
+
   /**
    * Вход пользователя в навык - Новая сессия.
    *
@@ -75,6 +80,7 @@ class User {
   async enter(message = '', extraProps = {}) {
     this._sessionsCount++;
     this._messagesCount = 0;
+    delete this._state.session;
     const request = buildEnterRequest(message);
     return this._sendRequest(request, extraProps);
   }
@@ -139,8 +145,8 @@ class User {
     this._resBody = null;
     this._reqTimestamp = Date.now();
     const isWebhookFunction = typeof this._webhookUrl === 'function';
-    this._resBody = await (isWebhookFunction ? this._callWebhook() : this._post());
-    this._handleResponse();
+    const resBody = await (isWebhookFunction ? this._callWebhook() : this._post());
+    this._handleResponse(resBody);
     return this._resBody.response;
   }
 
@@ -164,13 +170,23 @@ class User {
     }
   }
 
-  _handleResponse() {
+  _handleResponse(resBody) {
+    this._resBody = resBody;
     // вставляем в историю спереди, чтобы искать всегда начиная с самых последних ответов
     this._history.unshift(this._resBody.response);
     debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
     assertProtocol(this._resBody);
     assertStopWords(this._resBody);
     assertResponseTime(this._reqTimestamp);
+    this._updateState();
+  }
+
+  _updateState() {
+    if (this._resBody.session_state) {
+      this._state.session = this._resBody.session_state;
+    } else {
+      delete this._state.session;
+    }
   }
 
   _buildReqBody(request, extraProps) {
@@ -179,7 +195,7 @@ class User {
       sessionId: this.sessionId,
       messagesCount: ++this._messagesCount,
     });
-    this._reqBody = buildReqBody({ request, session });
+    this._reqBody = buildReqBody({ request, session, state: this._state });
     this._mergeExtraProps(this._extraProps);
     this._mergeExtraProps(extraProps);
     // sometimes userId is defined via function in extraProps and available only after the request body formed.
