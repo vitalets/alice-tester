@@ -52,14 +52,6 @@ describe('say', () => {
         text: 'хай',
         tts: 'даров'
       },
-      session:
-        {
-          new: false,
-          user_id: 'user-1',
-          session_id: 'session-1',
-          message_id: 2,
-          skill_id: 'test-skill'
-        },
       version: '1.0'
     });
     assert.deepEqual(user.response, {

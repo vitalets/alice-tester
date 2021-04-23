@@ -3,12 +3,12 @@ const micro = require('micro');
 const Timeout = require('await-timeout');
 
 const defaultHandler = async req => {
-  const {session, version} = req.body;
+  const {version} = req.body;
   const response = {
     text: 'привет',
     tts: 'привет'
   };
-  return {response, session, version};
+  return {response, version};
 };
 
 let handler = defaultHandler;
@@ -38,8 +38,8 @@ server.setEchoHandler = () => server.setHandler(req => {
 });
 server.setResponseBody = responseBody => server.setHandler(() => responseBody);
 server.setResponse = response => server.setHandler(req => {
-  const {session, version} = req.body;
-  return {response, session, version};
+  const {version} = req.body;
+  return {response, version};
 });
 server.setDelay = ms => delay = ms;
 server.reset = () => {

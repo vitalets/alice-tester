@@ -86,14 +86,6 @@ describe('tap (button)', () => {
           {title: 'Да'}
         ]
       },
-      session:
-        {
-          message_id: 2,
-          new: false,
-          session_id: 'session-1',
-          skill_id: 'test-skill',
-          user_id: 'user-1'
-        },
       version: '1.0'
     });
     assert.deepEqual(user.response, {
