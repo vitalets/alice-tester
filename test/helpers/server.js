@@ -51,4 +51,8 @@ server.reset = () => {
   handler = defaultHandler;
 };
 
+Object.defineProperty(server, 'lastRequest', {
+  get: () => server.requests[server.requests.length - 1]
+});
+
 module.exports = server;
