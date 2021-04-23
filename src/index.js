@@ -171,13 +171,13 @@ class User {
   }
 
   _handleResponse(resBody) {
+    debug(`RESPONSE: ${JSON.stringify(resBody)}`);
+    assertProtocol(resBody);
+    assertStopWords(resBody);
+    assertResponseTime(this._reqTimestamp);
     this._resBody = resBody;
     // вставляем в историю спереди, чтобы искать всегда начиная с самых последних ответов
-    this._history.unshift(this._resBody.response);
-    debug(`RESPONSE: ${JSON.stringify(this._resBody)}`);
-    assertProtocol(this._resBody);
-    assertStopWords(this._resBody);
-    assertResponseTime(this._reqTimestamp);
+    this._history.unshift(resBody.response);
     this._updateState();
   }
 
