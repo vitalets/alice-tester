@@ -193,6 +193,10 @@ class User {
     } else if (this._resBody.user_state_update === null) {
       delete this._state.user;
     }
+
+    if (this._resBody.application_state) {
+      this._state.application = this._resBody.application_state;
+    }
   }
 
   _buildReqBody(request, extraProps) {

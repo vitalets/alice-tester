@@ -13,10 +13,11 @@ describe('user state', () => {
     assert.deepEqual(server.lastRequest.state, {user: {value: 42}});
     assert.deepEqual(user.state, {user: {value: 42}});
 
-    server.setResponseBody({response, user_state_update: {value: 100}});
+    server.setResponseBody({response, user_state_update: {value2: 100}});
     await user.say('hi');
     assert.deepEqual(server.lastRequest.state, {user: {value: 42}});
-    assert.deepEqual(user.state, {user: {value: 100}});
+    // todo: re-check, maybe here will be {user: { value: 42, value2: 100 }}
+    assert.deepEqual(user.state, {user: {value2: 100}});
   });
 
   it('clear user state', async () => {
