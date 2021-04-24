@@ -32,6 +32,9 @@ describe('tap (button)', () => {
         {
           new: false,
           user_id: 'user-1',
+          application: {
+            application_id: 'user-1',
+          },
           session_id: 'session-1',
           message_id: 2,
           skill_id: 'test-skill'

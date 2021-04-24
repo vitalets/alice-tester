@@ -52,7 +52,10 @@ const buildButtonPressedRequest = payload => {
 const buildSessionObject = ({ userId, sessionId, messagesCount }) => {
   return {
     new: messagesCount === 1,
-    user_id: userId,
+    user_id: userId, /* deprecated in favor of application.application_id */
+    application: {
+      application_id: userId,
+    },
     session_id: sessionId,
     message_id: messagesCount,
     skill_id: 'test-skill',

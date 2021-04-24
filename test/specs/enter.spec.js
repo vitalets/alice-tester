@@ -21,6 +21,9 @@ describe('enter', () => {
         {
           new: true,
           user_id: 'user-1',
+          application: {
+            application_id: 'user-1',
+          },
           session_id: 'session-1',
           message_id: 1,
           skill_id: 'test-skill'
