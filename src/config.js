@@ -14,7 +14,7 @@ const defaults = {
 
   /**
    * Default webhook url.
-   * @type {String}
+   * @type {String|http.Server|Function}
    */
   webhookUrl: '',
 

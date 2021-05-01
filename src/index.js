@@ -25,7 +25,7 @@ class User {
   }
 
   /**
-   * @param {String|http.Server} [webhookUrl]
+   * @param {String|http.Server|Function} [webhookUrl]
    * @param {Object|Function} [extraProps] extraProps applied to every request
    */
   constructor(webhookUrl = '', extraProps = {}) {
