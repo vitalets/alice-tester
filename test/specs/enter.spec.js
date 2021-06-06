@@ -12,6 +12,7 @@ describe('enter', () => {
           nlu: {
             tokens: [],
             entities: [],
+            intents: {},
           },
           markup: {
             dangerous_context: false

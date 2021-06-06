@@ -78,6 +78,7 @@ describe('tap (items list)', () => {
           'картинка',
         ],
         entities: [],
+        intents: {}
       },
       markup: {
         dangerous_context: false
@@ -112,6 +113,7 @@ describe('tap (items list)', () => {
           'привет',
         ],
         entities: [],
+        intents: {},
       },
       markup: {
         dangerous_context: false
@@ -202,6 +204,7 @@ describe('tap (items list)', () => {
           'картинка',
         ],
         entities: [],
+        intents: {}
       },
       markup: {
         dangerous_context: false
@@ -266,6 +269,7 @@ describe('tap (items list)', () => {
           'привет',
         ],
         entities: [],
+        intents: {}
       },
       markup: {
         dangerous_context: false

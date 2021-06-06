@@ -49,6 +49,7 @@ describe('tap (big image)', () => {
           'картинка',
         ],
         entities: [],
+        intents: {},
       },
       markup: {
         dangerous_context: false
@@ -81,6 +82,7 @@ describe('tap (big image)', () => {
           'привет',
         ],
         entities: [],
+        intents: {},
       },
       markup: {
         dangerous_context: false
@@ -152,7 +154,7 @@ describe('tap (big image)', () => {
       command: 'картинка',
       original_utterance: 'картинка!',
       type: 'SimpleUtterance',
-      nlu: { tokens: [ 'картинка' ], entities: [] },
+      nlu: { tokens: [ 'картинка' ], entities: [], intents: {} },
       markup: {
         dangerous_context: true
       }
@@ -183,12 +185,7 @@ describe('tap (big image)', () => {
       command: 'картинка',
       original_utterance: 'картинка!',
       type: 'SimpleUtterance',
-      nlu: {
-        tokens: [
-          'картинка',
-        ],
-        entities: [],
-      },
+      nlu: { tokens: [ 'картинка' ], entities: [], intents: {} },
       markup: {
         dangerous_context: false
       },

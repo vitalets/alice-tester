@@ -23,6 +23,7 @@ describe('tap (button)', () => {
               'начинаем'
             ],
             entities: [],
+            intents: {}
           },
           markup: {
             dangerous_context: false
@@ -125,18 +126,18 @@ describe('tap (button)', () => {
     server.setResponse({
       text: 'text',
       buttons: [
-        { title: 'Да' }
+        { title: 'Ку' }
       ]
     });
     const user = new User();
     await user.enter();
-    await user.tap('Да', {request: {markup: {dangerous_context: true}}});
+    await user.tap('Ку', {request: {markup: {dangerous_context: true}}});
 
     assert.deepEqual(server.requests[1].request, {
-      command: 'да',
-      original_utterance: 'Да',
+      command: 'ку',
+      original_utterance: 'Ку',
       type: 'SimpleUtterance',
-      nlu: { tokens: [ 'да' ], entities: [] },
+      nlu: { tokens: [ 'ку' ], entities: [], intents: {} },
       markup: {
         dangerous_context: true
       }
@@ -209,7 +210,11 @@ describe('tap (button)', () => {
       command: 'кнопка',
       original_utterance: 'кнопка',
       type: 'SimpleUtterance',
-      nlu: { tokens: [ 'кнопка' ], entities: [] },
+      nlu: {
+        tokens: [ 'кнопка' ],
+        entities: [],
+        intents: {}
+      },
       markup: {
         dangerous_context: false
       }

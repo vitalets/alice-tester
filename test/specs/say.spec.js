@@ -17,6 +17,7 @@ describe('say', () => {
               'дела',
             ],
             entities: [],
+            intents: {},
           },
           markup: {
             dangerous_context: false
@@ -82,38 +83,27 @@ describe('say', () => {
     // todo: слова "плюс", "минус" вырезаются из tokens! Зарепортить баг: группа Танцы минус
     // todo: "5 разделить на 2 будет 2,5"
     await user.say('4 и 8 это 12');
-    assert.deepEqual(server.requests[1].request.nlu, {
-      tokens: ['4', 'и', '8', 'это', '12' ],
-      entities:
-        [
-          {
-            type: 'YANDEX.NUMBER',
-            value: 4,
-            tokens: {
-              start: 0,
-              end: 1,
-            }
-          },
-          {
-            type: 'YANDEX.NUMBER',
-            value: 8,
-            tokens: {
-              start: 2,
-              end: 3,
-            }
-          },
-          {
-            type: 'YANDEX.NUMBER',
-            value: 12,
-            tokens: {
-              start: 4,
-              end: 5,
-            }
-          },
-        ]
-    });
+    const { tokens, entities } = server.requests[1].request.nlu;
+    assert.deepEqual(tokens, ['4', 'и', '8', 'это', '12' ]);
+    assert.deepEqual(entities, [
+      { type: 'YANDEX.NUMBER', value: 4, tokens: { start: 0, end: 1 }},
+      { type: 'YANDEX.NUMBER', value: 8, tokens: { start: 2, end: 3 }},
+      { type: 'YANDEX.NUMBER', value: 12, tokens: { start: 4, end: 5 }},
+    ]);
   });
 
+  it('should fill build-in intent: YANDEX.CONFIRM', async () => {
+    const user = new User();
+
+    await user.enter();
+    await user.say('да');
+
+    assert.deepEqual(server.requests[1].request.nlu.intents, {
+      'YANDEX.CONFIRM': {
+        slots: {}
+      }
+    });
+  });
 
   it('in-call extraProps', async () => {
     const user = new User();
