@@ -3,13 +3,7 @@
  */
 const { throwIf } = require('throw-utils');
 const get = require('get-value');
-
-const MAX_LENGTHS = {
-  'response.text': 1024,
-  'response.tts': 1024,
-  'response.buttons.$i.title': 64,
-  'response.buttons.$i.url': 1024,
-};
+const config = require('../config');
 
 /**
  * Проверяем обязательные поля.
@@ -19,13 +13,11 @@ const MAX_LENGTHS = {
  * @param {object} resBody
  */
 exports.assertProtocol = resBody => {
-  assertRequiredProps(resBody);
-  assertPropLength(resBody, 'response.text');
-  assertPropLength(resBody, 'response.tts');
-  assertButtons(resBody);
+  assertPropsRequired(resBody);
+  assertPropsLength(resBody);
 };
 
-const assertRequiredProps = resBody => {
+const assertPropsRequired = resBody => {
   const requiredProps = [
     'response.text',
     'version',
@@ -35,17 +27,25 @@ const assertRequiredProps = resBody => {
   }
 };
 
-const assertPropLength = (obj, key, index) => {
-  const indexedKey = index !== undefined ? key.replace('$i', index) : key;
-  const value = get(obj, indexedKey, '');
-  const maxLength = MAX_LENGTHS[key];
-  throwIf(value.length > maxLength, () => buildErrorMessage(indexedKey, value, maxLength));
+const assertPropsLength = resBody => {
+  assertPropLength(resBody, 'response.text');
+  assertPropLength(resBody, 'response.tts');
+  assertButtonsLength(resBody);
 };
 
-const assertButtons = body => {
-  const buttons = get(body, 'response.buttons', []);
-  buttons.forEach((button, index) => assertPropLength(body, 'response.buttons.$i.title', index));
-  buttons.forEach((button, index) => assertPropLength(body, 'response.buttons.$i.url', index));
+const assertPropLength = (obj, key, index) => {
+  const maxLength = config.maxLengths[key];
+  if (maxLength) {
+    const indexedKey = index !== undefined ? key.replace('$i', index) : key;
+    const value = get(obj, indexedKey, '');
+    throwIf(value.length > maxLength, () => buildErrorMessage(indexedKey, value, maxLength));
+  }
+};
+
+const assertButtonsLength = resBody => {
+  const buttons = get(resBody, 'response.buttons', []);
+  buttons.forEach((_, index) => assertPropLength(resBody, 'response.buttons.$i.title', index));
+  buttons.forEach((_, index) => assertPropLength(resBody, 'response.buttons.$i.url', index));
 };
 
 const buildErrorMessage = (key, value, maxLength) => {

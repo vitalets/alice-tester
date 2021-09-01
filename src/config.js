@@ -33,6 +33,13 @@ const defaults = {
     'Error',
     'function',
   ],
+
+  maxLengths: {
+    'response.text': 1024,
+    'response.tts': 1024,
+    'response.buttons.$i.title': 64,
+    'response.buttons.$i.url': 1024,
+  }
 };
 
 module.exports = {...defaults};
