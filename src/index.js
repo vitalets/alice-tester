@@ -205,7 +205,9 @@ class User {
       sessionId: this.sessionId,
       messagesCount: ++this._messagesCount,
     });
-    this._reqBody = buildReqBody({ request, session, state: this._state });
+    // копируем state, чтобы избежать прямых мутаций
+    const state = JSON.parse(JSON.stringify(this._state));
+    this._reqBody = buildReqBody({ request, session, state });
     this._mergeExtraProps(this._extraProps);
     this._mergeExtraProps(extraProps);
     // sometimes userId is defined via function in extraProps and available only after the request body formed.
