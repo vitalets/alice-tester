@@ -30,6 +30,10 @@ describe('say', () => {
           application: {
             application_id: 'user-1',
           },
+          user: {
+            user_id: 'user-1',
+            access_token: 'token',
+          },
           session_id: 'session-1',
           message_id: 2,
           skill_id: 'test-skill'

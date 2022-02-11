@@ -56,6 +56,10 @@ const buildSessionObject = ({ userId, sessionId, messagesCount }) => {
     application: {
       application_id: userId,
     },
+    user: {
+      user_id: userId,
+      access_token: 'token'
+    },
     session_id: sessionId,
     message_id: messagesCount,
     skill_id: 'test-skill',
