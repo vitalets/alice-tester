@@ -189,7 +189,7 @@ class User {
     }
 
     if (this._resBody.user_state_update) {
-      this._state.user = this._resBody.user_state_update;
+      this._state.user = Object.assign({}, this._state.user, this._resBody.user_state_update);
     } else if (this._resBody.user_state_update === null) {
       delete this._state.user;
     }
