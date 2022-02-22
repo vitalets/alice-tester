@@ -26,6 +26,7 @@
   "main": "src/index.js",
   "files": [
     "src/",
+    "index.d.ts",
     "README.md"
   ],
   "engines": {
