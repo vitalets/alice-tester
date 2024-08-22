@@ -11,6 +11,12 @@ describe('assert: protocol', () => {
       });
     });
 
+    it('response.text empty string', async () => {
+      server.setResponse({ text: '' });
+      const user = new User();
+      await user.enter(); // does not reject
+    });
+
   });
 
   describe('max length', () => {

@@ -23,7 +23,7 @@ const assertPropsRequired = resBody => {
     'version',
   ];
   for (const prop of requiredProps) {
-    throwIf(!get(resBody, prop), `Отсутствует обязательное поле "${prop}"`);
+    throwIf(isEmpty(get(resBody, prop)), `Отсутствует обязательное поле "${prop}"`);
   }
 };
 
@@ -53,3 +53,4 @@ const buildErrorMessage = (key, value, maxLength) => {
   return `Length of ${key} (${value.length}) is greater than allowed (${maxLength}): ${truncatedValue}`;
 };
 
+const isEmpty = (value) => value === undefined || value === null;
