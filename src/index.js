@@ -113,16 +113,18 @@ class User {
    * @param {Object} [extraProps]
    * @returns {Promise}
    */
-  async tapImage(title, extraProps = {}) {
+  async tapImage(titleOrMatcherFn, extraProps = {}) {
     let imageButton;
-    if (!title) {
+    if (!titleOrMatcherFn) {
       const lastCard = this.response.card;
       throwIf(!lastCard || !lastCard.button, `Для tapImage() без параметра нужен bigImage с кнопкой в ответе.`);
       imageButton = image2Button(lastCard);
     } else {
-      const matcherFn = createButtonMatcherFn(title);
+      const matcherFn = typeof titleOrMatcherFn === 'function'
+        ? titleOrMatcherFn
+        : createButtonMatcherFn(titleOrMatcherFn);
       imageButton = this._findImageButtonInHistory(matcherFn);
-      throwIf(!imageButton, `Изображение с кнопкой "${title}" не найдено.`);
+      throwIf(!imageButton, `Изображение с кнопкой "${titleOrMatcherFn.toString()}" не найдено.`);
     }
     return this._sendTapRequest(imageButton, extraProps);
   }

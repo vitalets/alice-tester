@@ -161,7 +161,7 @@ describe('tap (big image)', () => {
     });
   });
 
-  it('tap big image in history', async () => {
+  it('tap big image in history (title)', async () => {
     server.setResponse({
       text: 'text',
       card: {
@@ -188,6 +188,36 @@ describe('tap (big image)', () => {
       nlu: { tokens: [ 'картинка' ], entities: [], intents: {} },
       markup: {
         dangerous_context: false
+      },
+    });
+  });
+
+  it('tap big image in history (payload)', async () => {
+    server.setResponse({
+      text: 'text',
+      card: {
+        type: 'BigImage',
+        image_id: '123',
+        title: 'картинка!',
+        button: {
+          payload: { foo: 42 }
+        }
+      }
+    });
+    const user = new User();
+    await user.enter();
+
+    server.setResponse({ text: 'text' });
+    await user.say('bla bla');
+
+    await user.tapImage(button => button.payload && button.payload.foo === 42);
+
+    assert.deepEqual(server.requests[2].request, {
+      type: 'ButtonPressed',
+      payload: { foo: 42 },
+      nlu: {
+        tokens: [],
+        entities: [],
       },
     });
   });
